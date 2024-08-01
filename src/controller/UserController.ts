@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 import gDB from "../InitDataSource";
-import {User} from "../entity/User";
+import {UserEntity} from "../entity/User.entity";
 import {validate} from "class-validator"
 import {CLog} from "../AppHelper";
 import ResponseHelper from "./ResponseHelper";
@@ -9,7 +9,7 @@ import user from "../route/user";
 class UserController {
 
     static async all(req: Request, resp: Response) {
-        const db = gDB.getRepository(User)
+        const db = gDB.getRepository(UserEntity)
         try{
             let users = await db.find();
             return resp.status(200).send(ResponseHelper.generateSuccessResult(users))
@@ -23,14 +23,14 @@ class UserController {
     static async add(req: Request, resp: Response) {
 
         const {firstName, lastName, age, email, password} = req.body
-        let user = new User(firstName, lastName, age, email, password);
+        let user = new UserEntity(firstName, lastName, age, email, password);
         let errors = await validate(user)
         if(errors.length > 0){
             CLog.bad("Validation error", errors)
             return resp.status(400).send(ResponseHelper.generateFailureResult(errors))
         }
 
-        const db = gDB.getRepository(User)
+        const db = gDB.getRepository(UserEntity)
         try{
             await db.save(user)
             return resp.status(200).send(ResponseHelper.generateSuccessResult(user))
@@ -49,7 +49,7 @@ class UserController {
             return resp.status(400).send(ResponseHelper.generateFailureResult('Invalid user id'))
         }
 
-        const db = gDB.getRepository(User)
+        const db = gDB.getRepository(UserEntity)
         try{
             let user = await db.findOneBy({id: Number(userId)})
             if(!user) {
@@ -73,14 +73,14 @@ class UserController {
         }
 
         const {firstName, lastName, age, email, password} = req.body
-        let user = new User(firstName, lastName, age, email, password);
+        let user = new UserEntity(firstName, lastName, age, email, password);
         let errors = await validate(user)
         if(errors.length > 0){
             CLog.bad("Validation error", errors)
             return resp.status(400).send(ResponseHelper.generateFailureResult(errors))
         }
 
-        const db = gDB.getRepository(User)
+        const db = gDB.getRepository(UserEntity)
         try{
             let existingUser = await db.findOneBy({id: Number(userId)})
             if(!existingUser) {
@@ -104,7 +104,7 @@ class UserController {
             return resp.status(400).send(ResponseHelper.generateFailureResult('Invalid user id'))
         }
 
-        const db = gDB.getRepository(User)
+        const db = gDB.getRepository(UserEntity)
         try{
             let existingUser = await db.findOneBy({id: Number(userId)})
             if(!existingUser) {

@@ -1,6 +1,5 @@
 import {Router} from "express";
 import UserController from "../controller/UserController";
-import AuthController from "../controller/AuthController";
 
 
 const userRouter = Router()
@@ -9,6 +8,5 @@ userRouter.get('/user/:userId', UserController.one)
 userRouter.put('/user/:userId', UserController.update)
 userRouter.delete('/user/:userId', UserController.delete)
 userRouter.get('/user', UserController.all)
-userRouter.get('/login', AuthController.login)
 
 export default userRouter

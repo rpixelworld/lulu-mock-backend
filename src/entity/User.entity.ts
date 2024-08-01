@@ -1,8 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
 import {IsEmail, Length, Max, Min} from "class-validator";
 
-@Entity()
-export class User {
+@Entity({name: "tbl_User"})
+export class UserEntity {
 
     @PrimaryGeneratedColumn()
     id: number;
