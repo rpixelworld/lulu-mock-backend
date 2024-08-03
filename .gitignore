@@ -2,3 +2,4 @@
 /node_modules/
 /lulu-backend.log
 /build/
+/lulu-backend.log.*
