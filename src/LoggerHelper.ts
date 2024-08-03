@@ -5,11 +5,11 @@ const logPattern = "%d %[[%p]%]\t [%f{2}:%l] %m";
 log4js.configure({
   appenders: {
     console: {
-      type: 'console',
+      type: "console",
       layout: {
-        type: 'pattern',
-        pattern: logPattern
-      }
+        type: "pattern",
+        pattern: logPattern,
+      },
     },
     file: {
       type: "dateFile",
@@ -17,19 +17,19 @@ log4js.configure({
       compress: true,
       keepFileExt: true,
       layout: {
-        type: 'pattern',
-        pattern: logPattern
-      }
+        type: "pattern",
+        pattern: logPattern,
+      },
     },
   },
   categories: {
     default: {
       appenders: ["console", "file"],
       level: "debug",
-      enableCallStack: true
-    }},
+      enableCallStack: true,
+    },
+  },
 });
-
 
 export const logger = log4js.getLogger();
 logger.level = "debug";

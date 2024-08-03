@@ -44,7 +44,7 @@ class UserController {
 
   static async one(req: Request, resp: Response) {
     const { userId } = req.params;
-    logger.info('find user with id=', userId, Number.isInteger(userId))
+    logger.info("find user with id=", userId, Number.isInteger(userId));
     if (!Number.isInteger(Number(userId))) {
       return resp
         .status(400)
