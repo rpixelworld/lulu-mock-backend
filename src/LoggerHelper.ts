@@ -13,7 +13,7 @@ log4js.configure({
     },
     file: {
       type: "dateFile",
-      filename: "lulu-backend.log",
+      filename: "logs/lulu-backend.log",
       compress: true,
       keepFileExt: true,
       layout: {

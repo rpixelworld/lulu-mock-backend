@@ -31,8 +31,7 @@
     "mysql2": "^3.11.0",
     "reflect-metadata": "^0.2.2",
     "stack-trace": "^1.0.0-pre2",
-    "typeorm": "0.3.20",
-    "winston": "^3.13.1"
+    "typeorm": "0.3.20"
   },
   "scripts": {
     "dev:start": "cross-env NODE_ENV=development  ts-node-dev --respawn --transpile-only ./src/index.ts",
