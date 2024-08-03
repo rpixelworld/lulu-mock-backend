@@ -4,7 +4,7 @@ import "reflect-metadata";
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import gDB from "./InitDataSource";
-import cors = require("cors");
+const cors = require("cors");
 import rootRouter from "./route";
 import { logger } from "./LoggerHelper";
 
@@ -30,9 +30,7 @@ const startServer = async () => {
     const server = app.listen(SERVER_PORT);
 
     // socket io
-    logger.info(
-      `NODE_ENV is : ${process.env.NODE_ENV}.\n Express server has started on port ${SERVER_PORT}.`,
-    );
+    logger.info(`NODE_ENV is: ${process.env.NODE_ENV}. Express server has started on port ${SERVER_PORT}.\n`);
   } catch (err) {
     logger.error("Error Server Initializing...", err);
     process.exit(1);

@@ -1,15 +1,35 @@
-import { createLogger, format, transports } from "winston";
+import * as log4js from "log4js";
+import exp = require("node:constants");
 
-export const logger = createLogger({
-  level: "info",
-  format: format.combine(
-    format.timestamp(),
-    format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} ${level}: ${message}`;
-    }),
-  ),
-  transports: [
-    new transports.Console(),
-    new transports.File({ filename: "lulu-backend.log" }),
-  ],
+const logPattern = "%d %[[%p]%]\t [%f{2}:%l] %m";
+log4js.configure({
+  appenders: {
+    console: {
+      type: 'console',
+      layout: {
+        type: 'pattern',
+        pattern: logPattern
+      }
+    },
+    file: {
+      type: "dateFile",
+      filename: "lulu-backend.log",
+      compress: true,
+      keepFileExt: true,
+      layout: {
+        type: 'pattern',
+        pattern: logPattern
+      }
+    },
+  },
+  categories: {
+    default: {
+      appenders: ["console", "file"],
+      level: "debug",
+      enableCallStack: true
+    }},
 });
+
+
+export const logger = log4js.getLogger();
+logger.level = "debug";
