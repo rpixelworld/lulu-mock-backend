@@ -1,5 +1,6 @@
-export enum DeliveryOption {
-    STANDARD = 'Standard',
-    EXPRESS = 'Express',
-    PRIORITY = 'Priority'
+export enum OrderStatus {
+  CREATED = 1,
+  PAID = 2,
+  SHIPPED = 3,
+  CANCELLED = 9,
 }

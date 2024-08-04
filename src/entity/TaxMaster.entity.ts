@@ -1,56 +1,35 @@
-import {Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn} from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  PrimaryColumn,
+} from "typeorm";
 import { IsEmail, Length, Max, Min } from "class-validator";
-import {ShippingAddress} from "./ShippingAddress.entity";
+import { ShippingAddress } from "./ShippingAddress.entity";
+import { Province } from "../common/Province";
 
-@Entity({ name: "TBL_USER" })
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+@Entity({ name: "TBL_TAX_MASTER" })
+export class TaxMaster {
+  @PrimaryColumn({ type: "enum", enum: Province })
+  province: Province;
 
-  @Column()
-  @Length(1, 300)
-  firstName: string;
+  @Column({ type: "float" })
+  gst: number;
 
-  @Column()
-  @Length(1, 300)
-  lastName: string;
+  @Column({ type: "float" })
+  pst: number;
 
-  @Column({ nullable: false })
-  @Min(1)
-  @Max(150)
-  age: number;
-
-  @Column({ nullable: false, unique: true })
-  @IsEmail()
-  @Length(5, 500)
-  email: string;
-
-  @Column({ nullable: false })
-  @Length(6, 100)
-  password: string;
-
-  @OneToMany(()=>ShippingAddress, (shippingAddress)=>shippingAddress.user)
-  shippingAddresses: ShippingAddress[];
+  @Column({ type: "float" })
+  hst: number;
 
   @Column()
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @Column()
   @UpdateDateColumn()
-  updatedAt: Date
-
-  constructor(
-    firstName: string,
-    lastName: string,
-    age: number,
-    email: string,
-    password: string,
-  ) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.age = age;
-    this.email = email;
-    this.password = password;
-  }
+  updatedAt: Date;
 }

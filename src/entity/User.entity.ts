@@ -1,8 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { IsEmail, Length, Max, Min } from "class-validator";
+import { ShippingAddress } from "./ShippingAddress.entity";
 
-@Entity({ name: "tbl_User" })
-export class UserEntity {
+@Entity({ name: "TBL_USER" })
+export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -27,6 +35,17 @@ export class UserEntity {
   @Column({ nullable: false })
   @Length(6, 100)
   password: string;
+
+  @OneToMany(() => ShippingAddress, (shippingAddress) => shippingAddress.user)
+  shippingAddresses: ShippingAddress[];
+
+  @Column()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Column()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   constructor(
     firstName: string,
