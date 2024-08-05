@@ -4,9 +4,11 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
-  UpdateDateColumn, BeforeInsert, BeforeUpdate,
+  UpdateDateColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from "typeorm";
-import * as bcrypt from "bcrypt"
+import * as bcrypt from "bcrypt";
 
 import { IsEmail, Length, Max, Min } from "class-validator";
 import { ShippingAddress } from "./ShippingAddress.entity";
@@ -52,7 +54,7 @@ export class User {
     return await bcrypt.compare(plainPassword, this.password);
   }
 
-  @Column({nullable:false})
+  @Column({ nullable: false })
   isAdmin: boolean;
 
   @OneToMany(() => ShippingAddress, (shippingAddress) => shippingAddress.user)

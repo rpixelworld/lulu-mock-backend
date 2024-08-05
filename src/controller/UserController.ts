@@ -33,7 +33,7 @@ class UserController {
     const db = gDB.getRepository(User);
     try {
       await db.save(user);
-      user.password = password.substring(0, 3) + '********'
+      user.password = password.substring(0, 3) + "********";
       return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
     } catch (e) {
       logger.error("create a user failed", e);
@@ -150,8 +150,7 @@ class UserController {
     }
   }
 
-  static async login(req: Request, resp: Response) {
-  }
+  static async login(req: Request, resp: Response) {}
 
   static async resetPassword(req: Request, resp: Response) {}
 
