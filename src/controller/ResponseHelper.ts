@@ -1,4 +1,4 @@
-import {ErrorCode} from "../common/ErrorCode";
+import { ErrorCode } from "../common/ErrorCode";
 
 class ResponseHelper {
   static generateSuccessResult(data: any) {

@@ -5,8 +5,8 @@ import { validate } from "class-validator";
 import ResponseHelper from "./ResponseHelper";
 import user from "../route/user";
 import { logger } from "../LoggerHelper";
-import {ErrorCode} from "../common/ErrorCode";
-import * as jwt from 'jsonwebtoken'
+import { ErrorCode } from "../common/ErrorCode";
+import * as jwt from "jsonwebtoken";
 
 class UserController {
   static async all(req: Request, resp: Response) {
@@ -17,7 +17,12 @@ class UserController {
     } catch (e) {
       resp
         .status(500)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
@@ -30,7 +35,12 @@ class UserController {
       logger.error("Validation error", errors);
       return resp
         .status(400)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.VALIDATION_ERROR,
+            errors,
+          ),
+        );
     }
 
     const db = gDB.getRepository(User);
@@ -42,7 +52,12 @@ class UserController {
       logger.error("create a user failed", e);
       resp
         .status(500)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
@@ -52,7 +67,12 @@ class UserController {
     if (!Number.isInteger(Number(userId))) {
       return resp
         .status(400)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, "Invalid user id"));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.VALIDATION_ERROR,
+            "Invalid user id",
+          ),
+        );
     }
 
     const db = gDB.getRepository(User);
@@ -63,7 +83,8 @@ class UserController {
           .status(400)
           .send(
             ResponseHelper.generateFailureResult(
-                ErrorCode.USER_NOT_EXIST, `User with id=${userId} not found`,
+              ErrorCode.USER_NOT_EXIST,
+              `User with id=${userId} not found`,
             ),
           );
       }
@@ -73,7 +94,12 @@ class UserController {
       logger.error("find a user failed", e);
       resp
         .status(500)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
@@ -84,7 +110,12 @@ class UserController {
     if (!Number.isInteger(Number(userId))) {
       return resp
         .status(400)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, "Invalid user id"));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.VALIDATION_ERROR,
+            "Invalid user id",
+          ),
+        );
     }
 
     const { firstName, lastName, age, email, password } = req.body;
@@ -94,7 +125,12 @@ class UserController {
       logger.error("Validation error", errors);
       return resp
         .status(400)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.VALIDATION_ERROR,
+            errors,
+          ),
+        );
     }
 
     const db = gDB.getRepository(User);
@@ -105,7 +141,8 @@ class UserController {
           .status(400)
           .send(
             ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST, `User with id=${userId} not found`,
+              ErrorCode.USER_NOT_EXIST,
+              `User with id=${userId} not found`,
             ),
           );
       }
@@ -116,7 +153,12 @@ class UserController {
       logger.error("update a user failed", e);
       resp
         .status(500)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
@@ -127,7 +169,12 @@ class UserController {
     if (!Number.isInteger(Number(userId))) {
       return resp
         .status(400)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, "Invalid user id"));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.VALIDATION_ERROR,
+            "Invalid user id",
+          ),
+        );
     }
 
     const db = gDB.getRepository(User);
@@ -138,7 +185,8 @@ class UserController {
           .status(400)
           .send(
             ResponseHelper.generateFailureResult(
-                ErrorCode.USER_NOT_EXIST, `User with id=${userId} not found`,
+              ErrorCode.USER_NOT_EXIST,
+              `User with id=${userId} not found`,
             ),
           );
       }
@@ -149,7 +197,12 @@ class UserController {
       logger.error("delete a user failed", e);
       resp
         .status(500)
-        .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
@@ -158,42 +211,52 @@ class UserController {
     logger.info(`User ${email} trying to login.`);
     const db = gDB.getRepository(User);
     try {
-      let user = await db.findOneBy({email: email})
+      let user = await db.findOneBy({ email: email });
       if (!user) {
         return resp
-            .status(400)
-            .send(
-                ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST,
-                    `User ${email} not found`,
-                ),
-            );
+          .status(400)
+          .send(
+            ResponseHelper.generateFailureResult(
+              ErrorCode.USER_NOT_EXIST,
+              `User ${email} not found`,
+            ),
+          );
       }
-      let loginSuccess = await user.comparePassword(password)
+      let loginSuccess = await user.comparePassword(password);
       if (!loginSuccess) {
         return resp
-            .status(400)
-            .send(
-                ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT,
-                    `Password incorrect`,
-                ),
-            );
+          .status(400)
+          .send(
+            ResponseHelper.generateFailureResult(
+              ErrorCode.PASSWORD_INCORRECT,
+              `Password incorrect`,
+            ),
+          );
       }
 
       const token = jwt.sign(
-          {uid: user.id,
-            email: user.email,
-            isAdmin: user.isAdmin},
-          process.env.JWT_SECRET, {expiresIn: '2h'})
+        { uid: user.id, email: user.email, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" },
+      );
 
-      return resp.status(200).send(ResponseHelper.generateSuccessResult({
-        email: user.email, isAdmin: user.isAdmin, token: token
-      }));
-
+      return resp.status(200).send(
+        ResponseHelper.generateSuccessResult({
+          email: user.email,
+          isAdmin: user.isAdmin,
+          token: token,
+        }),
+      );
     } catch (e) {
       logger.error("find a user failed", e);
       resp
-          .status(500)
-          .send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+        .status(500)
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
