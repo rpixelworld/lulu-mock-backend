@@ -21,6 +21,9 @@ export class OrderItem {
   @Column({ nullable: false })
   productId: string;
 
+  @Column({nullable: true})
+  productName: string;
+
   @Column({ nullable: false })
   colorId: string;
 

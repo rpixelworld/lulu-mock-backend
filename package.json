@@ -41,6 +41,8 @@
     "---Migration---": "typeorm migration:generate -n",
     "dev:schema:sync": "cross-env NODE_ENV=development ts-node ./node_modules/typeorm/cli.js schema:sync -d src/InitDataSource.ts",
     "dev:schema:drop": "cross-env NODE_ENV=development ts-node ./node_modules/typeorm/cli.js schema:drop -d src/InitDataSource.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "---Data initilization---": "",
+    "dev:data:init": "cross-env NODE_ENV=development  ts-node-dev --respawn --transpile-only ./src/InitData.ts"
   }
 }

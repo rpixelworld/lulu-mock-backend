@@ -4,7 +4,7 @@ import {
   Entity,
   ManyToOne,
   OneToOne,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn, Unique,
   UpdateDateColumn,
 } from "typeorm";
 import { ShippingAddress } from "./ShippingAddress.entity";
@@ -14,7 +14,8 @@ import { IsEnum } from "class-validator";
 import { Order } from "./Order.entity";
 
 @Entity({ name: "TBL_INVENTORY" })
-export class OrderItem {
+@Unique(['productId', 'colorId', 'size'])
+export class Inventory {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -37,4 +38,11 @@ export class OrderItem {
   @Column()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  constructor(productId: string, colorId: string, size: string, stock: number) {
+    this.productId = productId;
+    this.colorId = colorId;
+    this.size = size;
+    this.stock = stock;
+  }
 }
