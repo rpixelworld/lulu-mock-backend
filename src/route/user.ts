@@ -1,6 +1,6 @@
 import { Router } from "express";
 import UserController from "../controller/UserController";
-import {validateAdminJwt, validateJwt} from "../middleware/JwtValidator";
+import { validateAdminJwt, validateJwt } from "../middleware/JwtValidator";
 
 const userRouter = Router();
 userRouter.post("/", UserController.add);
