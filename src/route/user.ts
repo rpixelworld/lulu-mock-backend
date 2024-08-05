@@ -1,12 +1,13 @@
 import { Router } from "express";
 import UserController from "../controller/UserController";
+import {validateAdminJwt, validateJwt} from "../middleware/JwtValidator";
 
 const userRouter = Router();
 userRouter.post("/", UserController.add);
 userRouter.get("/:userId", UserController.one);
-userRouter.put("/:userId", UserController.update);
+userRouter.put("/:userId", [validateJwt], UserController.update);
 userRouter.delete("/:userId", UserController.delete);
-userRouter.get("/", UserController.all);
+userRouter.get("/", [validateAdminJwt], UserController.all);
 
 userRouter.get("/:userId/addresses", UserController.getAllShippingAddresses);
 userRouter.post("/:userId/addresses", UserController.addShippingAddress);

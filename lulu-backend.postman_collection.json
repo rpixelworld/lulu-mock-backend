@@ -34,13 +34,13 @@
 			"response": []
 		},
 		{
-			"name": "New Request",
+			"name": "login",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"abcd@hotmail.com\",\n    \"password\": \"password\"\n}",
+					"raw": "{\n    \"email\": \"abc@hotmail.com\",\n    \"password\": \"password\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -58,6 +58,42 @@
 						"login"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "reset password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"abc@hotmail.com\",\n    \"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/auth/reset-password",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"auth",
+						"reset-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all users",
+			"request": {
+				"method": "GET",
+				"header": []
 			},
 			"response": []
 		}
