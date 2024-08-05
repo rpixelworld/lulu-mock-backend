@@ -4,8 +4,10 @@ import {
   Column,
   OneToMany,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, BeforeInsert, BeforeUpdate,
 } from "typeorm";
+import * as bcrypt from "bcrypt"
+
 import { IsEmail, Length, Max, Min } from "class-validator";
 import { ShippingAddress } from "./ShippingAddress.entity";
 
@@ -36,6 +38,23 @@ export class User {
   @Length(6, 100)
   password: string;
 
+  // Hash the password before saving
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+  }
+
+  // Compare hashed password with plain text password
+  async comparePassword(plainPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, this.password);
+  }
+
+  @Column({nullable:false})
+  isAdmin: boolean;
+
   @OneToMany(() => ShippingAddress, (shippingAddress) => shippingAddress.user)
   shippingAddresses: ShippingAddress[];
 
@@ -59,5 +78,6 @@ export class User {
     this.age = age;
     this.email = email;
     this.password = password;
+    this.isAdmin = false;
   }
 }

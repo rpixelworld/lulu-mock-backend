@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "LuLu mock backend",
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.21",
     "@types/node": "^16.11.10",
     "eslint": "9.x",
