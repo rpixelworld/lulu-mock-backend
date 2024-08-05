@@ -149,25 +149,15 @@ class UserController {
     }
   }
 
-  static async login(req: Request, resp: Response) {
+  static async login(req: Request, resp: Response) {}
 
-  }
+  static async resetPassword(req: Request, resp: Response) {}
 
-  static async resetPassword(req: Request, resp: Response) {
+  static async getAllShippingAddresses(req: Request, resp: Response) {}
 
-  }
+  static async addShippingAddress(req: Request, resp: Response) {}
 
-  static async getAllShippingAddresses(req: Request, resp: Response) {
-
-  }
-
-  static async addShippingAddress(req: Request, resp: Response) {
-
-  }
-
-  static async deleteShippingAddress(req: Request, resp: Response) {
-
-  }
+  static async deleteShippingAddress(req: Request, resp: Response) {}
 }
 
 export default UserController;

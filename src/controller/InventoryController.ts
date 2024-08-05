@@ -7,20 +7,11 @@ import user from "../route/user";
 import { logger } from "../LoggerHelper";
 
 class InventoryController {
+  static async getProductInventory(req: Request, resp: Response) {}
 
-  static async getProductInventory(req: Request, resp: Response) {
+  static async getInventory(req: Request, resp: Response) {}
 
-  }
-
-  static async getInventory(req: Request, resp: Response) {
-
-  }
-
-  static async updateInventory(req: Request, resp: Response) {
-
-  }
-
-
+  static async updateInventory(req: Request, resp: Response) {}
 }
 
 export default InventoryController;

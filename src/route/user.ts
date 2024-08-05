@@ -10,6 +10,9 @@ userRouter.get("/", UserController.all);
 
 userRouter.get("/:userId/addresses", UserController.getAllShippingAddresses);
 userRouter.post("/:userId/addresses", UserController.addShippingAddress);
-userRouter.delete("/:userId/addresses/:addressId", UserController.deleteShippingAddress);
+userRouter.delete(
+  "/:userId/addresses/:addressId",
+  UserController.deleteShippingAddress,
+);
 
 export default userRouter;

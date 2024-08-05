@@ -10,5 +10,4 @@ orderRouter.post("/:orderId/pay", OrderController.payOrder);
 orderRouter.post("/:orderId/cancel", OrderController.cancelOrder);
 orderRouter.post("/:orderId/ship", OrderController.shipOrder);
 
-
 export default orderRouter;
