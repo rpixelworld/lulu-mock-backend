@@ -234,6 +234,7 @@ class UserController {
           );
       }
 
+      logger.info(`user ${email} login successfullym generating jwt token`);
       const token = jwt.sign(
         { uid: user.id, email: user.email, isAdmin: user.isAdmin },
         process.env.JWT_SECRET,
@@ -260,7 +261,44 @@ class UserController {
     }
   }
 
-  static async resetPassword(req: Request, resp: Response) {}
+  static async resetPassword(req: Request, resp: Response) {
+    const { email, password } = req.body;
+    logger.info(`User ${email} trying to reset password.`);
+    const db = gDB.getRepository(User);
+    try {
+      let user = await db.findOneBy({ email: email });
+      if (!user) {
+        return resp
+            .status(400)
+            .send(
+                ResponseHelper.generateFailureResult(
+                    ErrorCode.USER_NOT_EXIST,
+                    `User ${email} not found`,
+                ),
+            );
+      }
+      user.password = password
+      await db.save(user)
+
+      logger.info(`user ${email} password reset successfully`);
+      return resp.status(200).send(
+          ResponseHelper.generateSuccessResult({
+            email: user.email,
+            password: password.substring(0,3)+'********'
+          }),
+      );
+    } catch (e) {
+      logger.error("reset password failed", e);
+      resp
+          .status(500)
+          .send(
+              ResponseHelper.generateFailureResult(
+                  ErrorCode.DB_ERROR,
+                  e.driverError,
+              ),
+          );
+    }
+  }
 
   static async getAllShippingAddresses(req: Request, resp: Response) {}
 
