@@ -4,7 +4,8 @@ import {
   Entity,
   ManyToOne,
   OneToOne,
-  PrimaryGeneratedColumn, Unique,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from "typeorm";
 import { ShippingAddress } from "./ShippingAddress.entity";
@@ -14,7 +15,7 @@ import { IsEnum } from "class-validator";
 import { Order } from "./Order.entity";
 
 @Entity({ name: "TBL_INVENTORY" })
-@Unique(['productId', 'colorId', 'size'])
+@Unique(["productId", "colorId", "size"])
 export class Inventory {
   @PrimaryGeneratedColumn()
   id: number;
