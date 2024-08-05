@@ -1,3 +1,5 @@
+import {ErrorCode} from "../common/ErrorCode";
+
 class ResponseHelper {
   static generateSuccessResult(data: any) {
     return {
@@ -6,9 +8,10 @@ class ResponseHelper {
     };
   }
 
-  static generateFailureResult(error: any) {
+  static generateFailureResult(errorCode: ErrorCode, error: any) {
     return {
       status: "failed",
+      errorCode: errorCode,
       error: error,
     };
   }
