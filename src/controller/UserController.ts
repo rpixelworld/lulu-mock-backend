@@ -269,34 +269,34 @@ class UserController {
       let user = await db.findOneBy({ email: email });
       if (!user) {
         return resp
-            .status(400)
-            .send(
-                ResponseHelper.generateFailureResult(
-                    ErrorCode.USER_NOT_EXIST,
-                    `User ${email} not found`,
-                ),
-            );
+          .status(400)
+          .send(
+            ResponseHelper.generateFailureResult(
+              ErrorCode.USER_NOT_EXIST,
+              `User ${email} not found`,
+            ),
+          );
       }
-      user.password = password
-      await db.save(user)
+      user.password = password;
+      await db.save(user);
 
       logger.info(`user ${email} password reset successfully`);
       return resp.status(200).send(
-          ResponseHelper.generateSuccessResult({
-            email: user.email,
-            password: password.substring(0,3)+'********'
-          }),
+        ResponseHelper.generateSuccessResult({
+          email: user.email,
+          password: password.substring(0, 3) + "********",
+        }),
       );
     } catch (e) {
       logger.error("reset password failed", e);
       resp
-          .status(500)
-          .send(
-              ResponseHelper.generateFailureResult(
-                  ErrorCode.DB_ERROR,
-                  e.driverError,
-              ),
-          );
+        .status(500)
+        .send(
+          ResponseHelper.generateFailureResult(
+            ErrorCode.DB_ERROR,
+            e.driverError,
+          ),
+        );
     }
   }
 
