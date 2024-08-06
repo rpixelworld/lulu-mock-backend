@@ -34,6 +34,37 @@
 			"response": []
 		},
 		{
+			"name": "get user basic info Copy",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"AAA\",\n    \"lastName\": \"BBB\",\n    \"age\": 44,\n    \"email\": \"abdc@hotmail.com\",\n    \"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/users/1",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"users",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "login",
 			"request": {
 				"method": "POST",
@@ -93,7 +124,120 @@
 			"name": "get all users",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsImVtYWlsIjoiYWJjQGhvdG1haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzIyOTAwNjE0LCJleHAiOjE3MjI5MDc4MTR9.JoLQH3Yd1sCnCeSMzj7Ht-Kvhj04U04xJZil1YYElx8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "localhost:3399/users",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get product inventory",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3399/inventory/prod9820681",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"inventory",
+						"prod9820681"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get inventory by product-color-size",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3399/inventory/prod9820681/47824/2",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"inventory",
+						"prod9820681",
+						"47824",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update inventory by product-color-size Copy",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"stock\":4\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/inventory/prod9820681/47824/2",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"inventory",
+						"prod9820681",
+						"47824",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "orders",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"notificationEmail\": \"abc@hotmail.com\",\n  \"shippingAddressId\": 1, \n  \"deliveryOption\": \"Standard\",\n  \"deliveryFee\": 20,\n  \"tax\": 11.2,\n  \"totalItem\": 4,\n  \"totalAmount\": 198.00,\n  \"isGift\": true,\n  \"giftTo\": \"abc\",\n  \"giftFrom\": \"xyz\",\n  \"giftMessage\": \"Happy Bday\",\n  \"orderItems\": [\n    {\n      \"quantity\": 1,\n      \"productId\": \"prod9820681\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"47824\",\n      \"colorAlt\": \"Pink\",\n      \"size\":\"12\"\n    },\n    {\n      \"quantity\": 2,\n      \"productId\": \"prod11020892\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"0001\",\n      \"colorAlt\": \"White\",\n      \"size\":\"XS\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/orders",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"orders"
+					]
+				}
 			},
 			"response": []
 		}

@@ -1,310 +1,211 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 import gDB from "../InitDataSource";
-import { User } from "../entity/User.entity";
-import { validate } from "class-validator";
+import {User} from "../entity/User.entity";
+import {validate} from "class-validator";
 import ResponseHelper from "./ResponseHelper";
 import user from "../route/user";
-import { logger } from "../LoggerHelper";
-import { ErrorCode } from "../common/ErrorCode";
+import {logger} from "../LoggerHelper";
+import {ErrorCode} from "../common/ErrorCode";
 import * as jwt from "jsonwebtoken";
 
 class UserController {
-  static async all(req: Request, resp: Response) {
-    const db = gDB.getRepository(User);
-    try {
-      let users = await db.find();
-      return resp.status(200).send(ResponseHelper.generateSuccessResult(users));
-    } catch (e) {
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
-    }
-  }
-
-  //API – registration (add user)
-  static async add(req: Request, resp: Response) {
-    const { firstName, lastName, age, email, password } = req.body;
-    let user = new User(firstName, lastName, age, email, password);
-    let errors = await validate(user);
-    if (errors.length > 0) {
-      logger.error("Validation error", errors);
-      return resp
-        .status(400)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.VALIDATION_ERROR,
-            errors,
-          ),
-        );
+    static async all(req: Request, resp: Response) {
+        const db = gDB.getRepository(User);
+        try {
+            let users = await db.find();
+            return resp.status(200).send(ResponseHelper.generateSuccessResult(users));
+        } catch (e) {
+            resp
+                .status(500)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.DB_ERROR,
+                        e.driverError,
+                    ),
+                );
+        }
     }
 
-    const db = gDB.getRepository(User);
-    try {
-      await db.save(user);
-      user.password = password.substring(0, 3) + "********";
-      return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
-    } catch (e) {
-      logger.error("create a user failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
-    }
-  }
+    //API – registration (add user)
+    static async add(req: Request, resp: Response) {
+        const {firstName, lastName, age, email, password} = req.body;
+        let user = new User(firstName, lastName, age, email, password);
+        let errors = await validate(user);
+        if (errors.length > 0) {
+            logger.error("Validation error", errors);
+            return resp
+                .status(400)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.VALIDATION_ERROR,
+                        errors,
+                    ),
+                );
+        }
 
-  static async one(req: Request, resp: Response) {
-    const { userId } = req.params;
-    logger.info("find user with id=", userId, Number.isInteger(userId));
-    if (!Number.isInteger(Number(userId))) {
-      return resp
-        .status(400)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.VALIDATION_ERROR,
-            "Invalid user id",
-          ),
-        );
-    }
-
-    const db = gDB.getRepository(User);
-    try {
-      let user = await db.findOneBy({ id: Number(userId) });
-      if (!user) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST,
-              `User with id=${userId} not found`,
-            ),
-          );
-      }
-
-      return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
-    } catch (e) {
-      logger.error("find a user failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
-    }
-  }
-
-  static async update(req: Request, resp: Response) {
-    const { userId } = req.params;
-    logger.info(`updating user with id=${userId}`);
-
-    if (!Number.isInteger(Number(userId))) {
-      return resp
-        .status(400)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.VALIDATION_ERROR,
-            "Invalid user id",
-          ),
-        );
+        const db = gDB.getRepository(User);
+        try {
+            await db.save(user);
+            user.password = password.substring(0, 3) + "********";
+            return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
+        } catch (e) {
+            logger.error("create a user failed", e);
+            resp
+                .status(500)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.DB_ERROR,
+                        e.driverError,
+                    ),
+                );
+        }
     }
 
-    const { firstName, lastName, age, email, password } = req.body;
-    let user = new User(firstName, lastName, age, email, password);
-    let errors = await validate(user);
-    if (errors.length > 0) {
-      logger.error("Validation error", errors);
-      return resp
-        .status(400)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.VALIDATION_ERROR,
-            errors,
-          ),
-        );
+    static async one(req: Request, resp: Response) {
+        const {userId} = req.params;
+        logger.info("find user with id=", userId, Number.isInteger(userId));
+        if (!Number.isInteger(Number(userId))) {
+            return resp
+                .status(400)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.VALIDATION_ERROR,
+                        "Invalid user id",
+                    ),
+                );
+        }
+
+        const db = gDB.getRepository(User);
+        try {
+            let user = await db.findOneBy({id: Number(userId)});
+            if (!user) {
+                return resp
+                    .status(400)
+                    .send(
+                        ResponseHelper.generateFailureResult(
+                            ErrorCode.USER_NOT_EXIST,
+                            `User with id=${userId} not found`,
+                        ),
+                    );
+            }
+            user.password = '********';
+            return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
+        } catch (e) {
+            logger.error("find a user failed", e);
+            resp
+                .status(500)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.DB_ERROR,
+                        e.driverError,
+                    ),
+                );
+        }
     }
 
-    const db = gDB.getRepository(User);
-    try {
-      let existingUser = await db.findOneBy({ id: Number(userId) });
-      if (!existingUser) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST,
-              `User with id=${userId} not found`,
-            ),
-          );
-      }
-      user.id = existingUser.id;
-      await db.save(user);
-      return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
-    } catch (e) {
-      logger.error("update a user failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
+
+    static async login(req: Request, resp: Response) {
+        const {email, password} = req.body;
+        logger.info(`User ${email} trying to login.`);
+        const db = gDB.getRepository(User);
+        try {
+            let user = await db.findOneBy({email: email});
+            if (!user) {
+                return resp
+                    .status(400)
+                    .send(
+                        ResponseHelper.generateFailureResult(
+                            ErrorCode.USER_NOT_EXIST,
+                            `User ${email} not found`,
+                        ),
+                    );
+            }
+            let loginSuccess = await user.comparePassword(password);
+            if (!loginSuccess) {
+                return resp
+                    .status(400)
+                    .send(
+                        ResponseHelper.generateFailureResult(
+                            ErrorCode.PASSWORD_INCORRECT,
+                            `Password incorrect`,
+                        ),
+                    );
+            }
+
+            logger.info(`user ${email} login successfullym generating jwt token`);
+            const token = jwt.sign(
+                {uid: user.id, email: user.email, isAdmin: user.isAdmin},
+                process.env.JWT_SECRET,
+                {expiresIn: "2h"},
+            );
+
+            return resp.status(200).send(
+                ResponseHelper.generateSuccessResult({
+                    email: user.email,
+                    isAdmin: user.isAdmin,
+                    token: token,
+                }),
+            );
+        } catch (e) {
+            logger.error("find a user failed", e);
+            resp
+                .status(500)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.DB_ERROR,
+                        e.driverError,
+                    ),
+                );
+        }
     }
-  }
 
-  static async delete(req: Request, resp: Response) {
-    const { userId } = req.params;
-    logger.error(`deleting user with id=${userId}`);
+    static async resetPassword(req: Request, resp: Response) {
+        const {email, password} = req.body;
+        logger.info(`User ${email} trying to reset password.`);
+        const db = gDB.getRepository(User);
+        try {
+            let user = await db.findOneBy({email: email});
+            if (!user) {
+                return resp
+                    .status(400)
+                    .send(
+                        ResponseHelper.generateFailureResult(
+                            ErrorCode.USER_NOT_EXIST,
+                            `User ${email} not found`,
+                        ),
+                    );
+            }
+            user.password = password;
+            await db.save(user);
 
-    if (!Number.isInteger(Number(userId))) {
-      return resp
-        .status(400)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.VALIDATION_ERROR,
-            "Invalid user id",
-          ),
-        );
+            logger.info(`user ${email} password reset successfully`);
+            return resp.status(200).send(
+                ResponseHelper.generateSuccessResult({
+                    email: user.email,
+                    password: password.substring(0, 3) + "********",
+                }),
+            );
+        } catch (e) {
+            logger.error("reset password failed", e);
+            resp
+                .status(500)
+                .send(
+                    ResponseHelper.generateFailureResult(
+                        ErrorCode.DB_ERROR,
+                        e.driverError,
+                    ),
+                );
+        }
     }
 
-    const db = gDB.getRepository(User);
-    try {
-      let existingUser = await db.findOneBy({ id: Number(userId) });
-      if (!existingUser) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST,
-              `User with id=${userId} not found`,
-            ),
-          );
-      }
-
-      await db.remove(existingUser);
-      return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
-    } catch (e) {
-      logger.error("delete a user failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
+    static async getAllShippingAddresses(req: Request, resp: Response) {
     }
-  }
 
-  static async login(req: Request, resp: Response) {
-    const { email, password } = req.body;
-    logger.info(`User ${email} trying to login.`);
-    const db = gDB.getRepository(User);
-    try {
-      let user = await db.findOneBy({ email: email });
-      if (!user) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST,
-              `User ${email} not found`,
-            ),
-          );
-      }
-      let loginSuccess = await user.comparePassword(password);
-      if (!loginSuccess) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.PASSWORD_INCORRECT,
-              `Password incorrect`,
-            ),
-          );
-      }
-
-      logger.info(`user ${email} login successfullym generating jwt token`);
-      const token = jwt.sign(
-        { uid: user.id, email: user.email, isAdmin: user.isAdmin },
-        process.env.JWT_SECRET,
-        { expiresIn: "2h" },
-      );
-
-      return resp.status(200).send(
-        ResponseHelper.generateSuccessResult({
-          email: user.email,
-          isAdmin: user.isAdmin,
-          token: token,
-        }),
-      );
-    } catch (e) {
-      logger.error("find a user failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
+    static async addShippingAddress(req: Request, resp: Response) {
     }
-  }
 
-  static async resetPassword(req: Request, resp: Response) {
-    const { email, password } = req.body;
-    logger.info(`User ${email} trying to reset password.`);
-    const db = gDB.getRepository(User);
-    try {
-      let user = await db.findOneBy({ email: email });
-      if (!user) {
-        return resp
-          .status(400)
-          .send(
-            ResponseHelper.generateFailureResult(
-              ErrorCode.USER_NOT_EXIST,
-              `User ${email} not found`,
-            ),
-          );
-      }
-      user.password = password;
-      await db.save(user);
-
-      logger.info(`user ${email} password reset successfully`);
-      return resp.status(200).send(
-        ResponseHelper.generateSuccessResult({
-          email: user.email,
-          password: password.substring(0, 3) + "********",
-        }),
-      );
-    } catch (e) {
-      logger.error("reset password failed", e);
-      resp
-        .status(500)
-        .send(
-          ResponseHelper.generateFailureResult(
-            ErrorCode.DB_ERROR,
-            e.driverError,
-          ),
-        );
+    static async deleteShippingAddress(req: Request, resp: Response) {
     }
-  }
-
-  static async getAllShippingAddresses(req: Request, resp: Response) {}
-
-  static async addShippingAddress(req: Request, resp: Response) {}
-
-  static async deleteShippingAddress(req: Request, resp: Response) {}
 }
 
 export default UserController;
