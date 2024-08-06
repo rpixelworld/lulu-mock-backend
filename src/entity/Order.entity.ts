@@ -1,7 +1,7 @@
 import {
   Column,
   CreateDateColumn,
-  Entity,
+  Entity, ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -9,10 +9,10 @@ import {
 } from "typeorm";
 import { ShippingAddress } from "./ShippingAddress.entity";
 import { DeliveryOption } from "../common/DeliveryOption";
-import { Province } from "../common/Province";
 import { IsEmail, IsEnum, Length } from "class-validator";
 import { OrderStatus } from "../common/OrderStatus";
 import { OrderItem } from "./OrderItem.entity";
+import {User} from "./User.entity";
 
 @Entity({ name: "TBL_ORDER" })
 export class Order {
@@ -30,8 +30,11 @@ export class Order {
   @Length(1, 64)
   notificationEmail: string;
 
-  @OneToOne(() => ShippingAddress)
-  ShippingAddress: ShippingAddress;
+  @ManyToOne(() => User, (user) => user.orders)
+  user: User;
+
+  @ManyToOne(() => ShippingAddress, (shippingAddress) => shippingAddress.orders)
+  shippingAddress: ShippingAddress;
 
   @Column({ nullable: false, type: "enum", enum: DeliveryOption })
   @IsEnum(DeliveryOption, { message: "Not a valid delivery option" })

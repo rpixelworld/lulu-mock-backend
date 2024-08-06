@@ -4,7 +4,7 @@ import {
   Column,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, OneToMany,
 } from "typeorm";
 import {
   IsEnum,
@@ -16,6 +16,7 @@ import {
 } from "class-validator";
 import { Province } from "../common/Province";
 import { User } from "./User.entity";
+import {Order} from "./Order.entity";
 
 @Entity({ name: "TBL_SHIPPING_ADDRESS" })
 export class ShippingAddress {
@@ -53,6 +54,9 @@ export class ShippingAddress {
 
   @ManyToOne(() => User, (user) => user.shippingAddresses)
   user: User;
+
+  @OneToMany(() => Order, (order) => order.shippingAddress)
+  orders: Order[]
 
   @Column()
   @CreateDateColumn()

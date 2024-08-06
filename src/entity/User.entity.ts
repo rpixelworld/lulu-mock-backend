@@ -6,12 +6,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   BeforeInsert,
-  BeforeUpdate,
+  BeforeUpdate, OneToOne,
 } from "typeorm";
 import * as bcrypt from "bcrypt";
 
 import { IsEmail, Length, Max, Min } from "class-validator";
 import { ShippingAddress } from "./ShippingAddress.entity";
+import {Order} from "./Order.entity";
 
 @Entity({ name: "TBL_USER" })
 export class User {
@@ -59,6 +60,9 @@ export class User {
 
   @OneToMany(() => ShippingAddress, (shippingAddress) => shippingAddress.user)
   shippingAddresses: ShippingAddress[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[]
 
   @Column()
   @CreateDateColumn()
