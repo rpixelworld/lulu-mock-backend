@@ -28,13 +28,16 @@ export class OrderItem {
   colorId: string;
 
   @Column({ nullable: false })
+  colorAlt: string
+
+  @Column({ nullable: false })
   size: string;
 
   @Column({ nullable: false, type: "float" })
   price: number;
 
   @Column({ nullable: false, type: "int" })
-  quanty: number;
+  quantity: number;
 
   @ManyToOne(() => Order, (order) => order.orderItems)
   order: Order;

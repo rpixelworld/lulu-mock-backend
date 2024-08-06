@@ -52,15 +52,15 @@ export class Order {
   @Column({ nullable: false })
   isGift: boolean;
 
-  @Column()
+  @Column({nullable: true})
   @Length(0, 32)
   giftTo: string;
 
-  @Column()
+  @Column({nullable: true})
   @Length(0, 32)
   giftFrom: string;
 
-  @Column()
+  @Column({nullable: true})
   @Length(0, 1024)
   giftMessage: string;
 
