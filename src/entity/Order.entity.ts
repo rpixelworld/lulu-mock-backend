@@ -30,10 +30,10 @@ export class Order {
   @Length(1, 64)
   notificationEmail: string;
 
-  @ManyToOne(() => User, (user) => user.orders)
+  @ManyToOne(() => User, (user) => user.orders, {nullable:false})
   user: User;
 
-  @ManyToOne(() => ShippingAddress, (shippingAddress) => shippingAddress.orders)
+  @ManyToOne(() => ShippingAddress, (shippingAddress) => shippingAddress.orders, {nullable:false})
   shippingAddress: ShippingAddress;
 
   @Column({ nullable: false, type: "enum", enum: DeliveryOption })
