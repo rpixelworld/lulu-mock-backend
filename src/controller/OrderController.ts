@@ -9,6 +9,8 @@ import { logger } from "../LoggerHelper";
 class OrderController {
   static async getUserOrders(req: Request, resp: Response) {}
 
+  static async getAllOrders(req: Request, resp: Response) {}
+
   static async download(req: Request, resp: Response) {}
 
   static async placeOrder(req: Request, resp: Response) {}
