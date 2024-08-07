@@ -29,7 +29,7 @@ const options: DataSourceOptions = {
   database: process.env.MYSQL_DB_NAME,
   synchronize: process.env.MYSQL_DB_SYNC.toLowerCase() === "true",
   extra: { connectionLimit: 50 },
-  logging: ["error"],
+  logging: true,
   maxQueryExecutionTime: 3000, //logging query executing 1 second
 
   // "keepConnectionAlive":true,

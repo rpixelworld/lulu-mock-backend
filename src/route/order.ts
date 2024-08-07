@@ -6,6 +6,7 @@ import {validateAdminJwt, validateJwt} from "../middleware/JwtValidator";
 const orderRouter = Router();
 orderRouter.post("/:userId", [validateJwt], OrderController.getUserOrders);
 orderRouter.post("/", [validateAdminJwt], OrderController.getAllOrders);
+orderRouter.get("/:orderId", [validateJwt], OrderController.getOneOrder);
 orderRouter.get("/:orderId/download/:type", [validateJwt], OrderController.download);
 orderRouter.post("/", [validateJwt], OrderController.placeOrder);
 orderRouter.post("/:orderId/pay", [validateJwt], OrderController.payOrder);

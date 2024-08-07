@@ -15,6 +15,15 @@ class ResponseHelper {
       error: error,
     };
   }
+
+  static generatePaginationParams(pageNo:number, pageSize:number, total:number, currentTotal:number): any {
+    return {
+      pageNo: pageNo,
+      pageSize: pageSize,
+      total: total,
+      currentTotal: currentTotal
+    }
+  }
 }
 
 export default ResponseHelper;

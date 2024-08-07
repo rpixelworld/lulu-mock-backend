@@ -3,7 +3,6 @@ import gDB from "../InitDataSource";
 import {User} from "../entity/User.entity";
 import {validate} from "class-validator";
 import ResponseHelper from "./ResponseHelper";
-import user from "../route/user";
 import {logger} from "../LoggerHelper";
 import {ErrorCode} from "../common/ErrorCode";
 import * as jwt from "jsonwebtoken";
