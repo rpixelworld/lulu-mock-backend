@@ -16,12 +16,7 @@ class MasterDataController {
 
             if (taxRate) {
                 logger.info(`Tax rate found: ${JSON.stringify(taxRate)}`);
-                res.status(200).send(ResponseHelper.generateSuccessResult({
-                    province,
-                    gst: taxRate.gst,
-                    pst: taxRate.pst,
-                    hst: taxRate.hst
-                }));
+                res.status(200).send(ResponseHelper.generateSuccessResult(taxRate));
             } else {
                 logger.warn(`Tax rate not found for province: ${province}`);
                 res.status(400).send(

@@ -72,9 +72,7 @@ class OrderController {
                 where: {id: Number(orderId) },
                 relations: ['orderItems']
             })
-            return resp.status(200).send(ResponseHelper.generateSuccessResult({
-                order: order
-            }))
+            return resp.status(200).send(ResponseHelper.generateSuccessResult(order))
         }
         catch (e) {
             logger.error("Exception find orders", e);
