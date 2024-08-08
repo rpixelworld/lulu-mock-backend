@@ -12,7 +12,7 @@ class ResponseHelper {
 		return {
 			status: 'failed',
 			errorCode: errorCode,
-			error: error,
+			message: error,
 		};
 	}
 

@@ -46,6 +46,10 @@ export class ShippingAddress {
 	@IsPostalCode('CA')
 	postalCode: string;
 
+	@Column({ nullable: false })
+	@Length(1, 6)
+	countryCode: string;
+
 	@ManyToOne(() => User, user => user.shippingAddresses)
 	user: User;
 

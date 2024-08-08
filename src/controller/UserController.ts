@@ -50,7 +50,7 @@ class UserController {
 
 		const db = gDB.getRepository(User);
 		try {
-			let user = await db.findOneBy({ id: Number(userId) });
+			let user = await db.findOne({ where: {id: Number(userId)}, relations: ['shippingAddresses'] });
 			if (!user) {
 				return resp
 					.status(400)
@@ -78,13 +78,13 @@ class UserController {
 			if (!user) {
 				return resp
 					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, `User ${email} not found`));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, `User not exist.`));
 			}
 			let loginSuccess = await user.comparePassword(password);
 			if (!loginSuccess) {
 				return resp
 					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password incorrect`));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password Incorrect.`));
 			}
 
 			logger.info(`user ${email} login successfullym generating jwt token`);
@@ -94,6 +94,7 @@ class UserController {
 
 			return resp.status(200).send(
 				ResponseHelper.generateSuccessResult({
+					userId: user.id,
 					email: user.email,
 					isAdmin: user.isAdmin,
 					token: token,
