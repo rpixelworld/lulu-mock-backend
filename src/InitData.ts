@@ -95,7 +95,7 @@ export const initInventory = async () => {
     for (let k = 0; k < colorsArr.length; k++) {
       for (let j = 0; j < sizesArr.length; j++) {
         inventoryArr.push(
-          new Inventory(productId, colorsArr[k], sizesArr[j], getRandomInt(5)),
+          new Inventory(productId, colorsArr[k], sizesArr[j], getRandomInt(20)),
         );
       }
     }
@@ -120,7 +120,7 @@ function loadProductsfromJson(): any[] {
 
 async function execute() {
   await gDB.initialize();
-  await initTaxMaster();
+  // await initTaxMaster();
   await initInventory();
 }
 
