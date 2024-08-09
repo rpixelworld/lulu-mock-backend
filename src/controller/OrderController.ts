@@ -152,7 +152,6 @@ class OrderController {
 
 	static async download(req: Request, resp: Response) {}
 
-
 	static async payOrder(req: Request, resp: Response) {
 		const { orderId } = req.params;
 		if (!Number.isInteger(Number(orderId))) {
