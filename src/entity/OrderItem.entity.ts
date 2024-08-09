@@ -7,10 +7,6 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
-import { ShippingAddress } from './ShippingAddress.entity';
-import { DeliveryOption } from '../common/DeliveryOption';
-import { Province } from '../common/Province';
-import { IsEnum } from 'class-validator';
 import { Order } from './Order.entity';
 
 @Entity({ name: 'TBL_ORDER_ITEM' })
@@ -23,6 +19,9 @@ export class OrderItem {
 
 	@Column({ nullable: true })
 	productName: string;
+
+	@Column({ nullable: true })
+	imageUrl: string;
 
 	@Column({ nullable: false })
 	colorId: string;
