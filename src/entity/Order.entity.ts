@@ -69,10 +69,10 @@ export class Order {
 	giftMessage: string;
 
 	@Column({ nullable: true })
-	paymentMethod: PaymentMethod
+	paymentMethod: PaymentMethod;
 
 	@Column({ nullable: true })
-	paymentComment: string
+	paymentComment: string;
 
 	@Column()
 	@CreateDateColumn()

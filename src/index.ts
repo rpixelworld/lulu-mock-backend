@@ -6,7 +6,6 @@ import { logger } from './LoggerHelper';
 import express = require('express');
 const cors = require('cors');
 
-
 const MAX_UPLOAD_FILE_SIZE = 50;
 const SERVER_PORT = process.env.PORT;
 
