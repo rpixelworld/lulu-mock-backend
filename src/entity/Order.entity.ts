@@ -68,7 +68,7 @@ export class Order {
 	@Length(0, 1024)
 	giftMessage: string;
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, type: 'enum', enum: PaymentMethod })
 	paymentMethod: PaymentMethod;
 
 	@Column({ nullable: true })
