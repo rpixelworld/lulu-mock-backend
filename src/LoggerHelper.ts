@@ -1,5 +1,4 @@
 import * as log4js from 'log4js';
-import exp = require('node:constants');
 
 const logPattern = '%d %[[%p]%]\t [%f{2}:%l %M] %m';
 log4js.configure({

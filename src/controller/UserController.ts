@@ -95,6 +95,7 @@ class UserController {
 			return resp.status(200).send(
 				ResponseHelper.generateSuccessResult({
 					userId: user.id,
+					firstName: user.firstName,
 					email: user.email,
 					isAdmin: user.isAdmin,
 					token: token,

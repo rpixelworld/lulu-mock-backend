@@ -1,12 +1,11 @@
 import 'reflect-metadata';
-
-import 'reflect-metadata';
-import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import gDB from './InitDataSource';
-const cors = require('cors');
 import rootRouter from './route';
 import { logger } from './LoggerHelper';
+import express = require('express');
+const cors = require('cors');
+
 
 const MAX_UPLOAD_FILE_SIZE = 50;
 const SERVER_PORT = process.env.PORT;

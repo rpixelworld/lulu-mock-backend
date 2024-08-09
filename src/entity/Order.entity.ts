@@ -4,7 +4,6 @@ import {
 	Entity,
 	ManyToOne,
 	OneToMany,
-	OneToOne,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +13,7 @@ import { IsEmail, IsEnum, Length } from 'class-validator';
 import { OrderStatus } from '../common/OrderStatus';
 import { OrderItem } from './OrderItem.entity';
 import { User } from './User.entity';
+import { PaymentMethod } from '../common/PaymentMethod';
 
 @Entity({ name: 'TBL_ORDER' })
 export class Order {
@@ -67,6 +67,12 @@ export class Order {
 	@Column({ nullable: true })
 	@Length(0, 1024)
 	giftMessage: string;
+
+	@Column({ nullable: true })
+	paymentMethod: PaymentMethod
+
+	@Column({ nullable: true })
+	paymentComment: string
 
 	@Column()
 	@CreateDateColumn()
