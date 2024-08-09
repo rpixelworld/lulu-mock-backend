@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
-import ResponseHelper from './ResponseHelper';
-import { logger } from '../LoggerHelper';
-import { ErrorCode } from '../common/ErrorCode';
-import { FindManyOptions, FindOneOptions, Repository, SelectQueryBuilder } from 'typeorm';
 import { Order } from '../entity/Order.entity';
+import { logger } from '../LoggerHelper';
+import ResponseHelper from './ResponseHelper';
+import { ErrorCode } from '../common/ErrorCode';
+import { validate } from 'class-validator';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { User } from '../entity/User.entity';
+import { ShippingAddress } from '../entity/ShippingAddress.entity';
 import { OrderStatus } from '../common/OrderStatus';
-import user from '../route/user';
-import { create } from 'node:domain';
 
 class OrderController {
 	static async getUserOrders(req: Request, resp: Response) {
@@ -72,6 +73,61 @@ class OrderController {
 		}
 	}
 
+	static async placeOrder(req: Request, resp: Response) {
+		logger.info('placing order');
+		try {
+			const { userId, shippingAddressId } = req.body;
+
+			if (userId && !Number.isInteger(Number(userId))) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
+			}
+			if (shippingAddressId && !Number.isInteger(Number(shippingAddressId))) {
+				return resp
+					.status(400)
+					.send(
+						ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid shippingAddress id')
+					);
+			}
+
+			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
+			if (!user) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
+			}
+			const shippingAddress = await gDB
+				.getRepository(ShippingAddress)
+				.findOne({ where: { id: shippingAddressId } });
+			if (!shippingAddress) {
+				return resp
+					.status(400)
+					.send(
+						ResponseHelper.generateFailureResult(ErrorCode.ADDRESS_NOT_EXIST, 'Shipping address not exist')
+					);
+			}
+
+			let order: Order = Object.assign(new Order(), req.body);
+			const errors = await validate(order);
+			if (errors.length > 0) {
+				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+			}
+			order.user = user;
+			order.shippingAddress = shippingAddress;
+			order.status = OrderStatus.CREATED;
+
+			await gDB.getRepository(Order).save(order);
+
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
+		} catch (error) {
+			logger.error('error place order', error);
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'internal server error'));
+		}
+	}
+
 	static async getOneOrder(req: Request, resp: Response) {
 		const { orderId } = req.params;
 		if (!Number.isInteger(Number(orderId))) {
@@ -93,8 +149,6 @@ class OrderController {
 	}
 
 	static async download(req: Request, resp: Response) {}
-
-	static async placeOrder(req: Request, resp: Response) {}
 
 	static async payOrder(req: Request, resp: Response) {}
 
