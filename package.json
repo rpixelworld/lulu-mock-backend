@@ -31,6 +31,7 @@
     "log4js": "^6.9.1",
     "moment": "^2.30.1",
     "mysql2": "^3.11.0",
+    "node-fetch": "2",
     "reflect-metadata": "^0.2.2",
     "stack-trace": "^1.0.0-pre2",
     "typeorm": "0.3.20"

@@ -221,7 +221,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"notificationEmail\": \"abc@hotmail.com\",\n  \"shippingAddressId\": 1, \n  \"deliveryOption\": \"Standard\",\n  \"deliveryFee\": 20,\n  \"tax\": 11.2,\n  \"totalItem\": 4,\n  \"totalAmount\": 198.00,\n  \"isGift\": true,\n  \"giftTo\": \"abc\",\n  \"giftFrom\": \"xyz\",\n  \"giftMessage\": \"Happy Bday\",\n  \"orderItems\": [\n    {\n      \"quantity\": 1,\n      \"productId\": \"prod9820681\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"47824\",\n      \"colorAlt\": \"Pink\",\n      \"size\":\"12\"\n    },\n    {\n      \"quantity\": 2,\n      \"productId\": \"prod11020892\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"0001\",\n      \"colorAlt\": \"White\",\n      \"size\":\"XS\"\n    }\n  ]\n}",
+					"raw": "{\n  \"userId\": 1, \n  \"notificationEmail\": \"abc@hotmail.com\",\n  \"shippingAddressId\": 1, \n  \"deliveryOption\": \"Standard\",\n  \"deliveryFee\": 20,\n  \"tax\": 11.2,\n  \"totalItem\": 4,\n  \"totalAmount\": 198.00,\n  \"isGift\": true,\n  \"giftTo\": \"abc\",\n  \"giftFrom\": \"xyz\",\n  \"giftMessage\": \"Happy Bday\",\n  \"orderItems\": [\n    {\n      \"quantity\": 1,\n      \"productId\": \"prod9820681\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"47824\",\n      \"colorAlt\": \"Pink\",\n      \"size\":\"12\"\n    },\n    {\n      \"quantity\": 2,\n      \"productId\": \"prod11020892\",\n      \"productName\": \"Legging\",\n      \"colorId\":\"0001\",\n      \"colorAlt\": \"White\",\n      \"size\":\"XS\"\n    }\n  ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -236,6 +236,151 @@
 					"port": "3399",
 					"path": [
 						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find orders",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsImVtYWlsIjoiYWJjQGhvdG1haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzIzMDAxMjgwLCJleHAiOjE3MjMwMDg0ODB9.dmWjF4u5NkGARMS2u1IuVxb7UDa6-Rd4WzAvjLm8vjQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/orders?pageNo=2",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"orders"
+					],
+					"query": [
+						{
+							"key": "pageNo",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find one order",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsImVtYWlsIjoiYWJjQGhvdG1haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzIzMDAxMjgwLCJleHAiOjE3MjMwMDg0ODB9.dmWjF4u5NkGARMS2u1IuVxb7UDa6-Rd4WzAvjLm8vjQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/orders/1",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"orders",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get tax rate by province",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/master/tax-rates/BC",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"master",
+						"tax-rates",
+						"BC"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "find one order Copy",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjEsImVtYWlsIjoiYWJjQGhvdG1haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzIzMDAxMjgwLCJleHAiOjE3MjMwMDg0ODB9.dmWjF4u5NkGARMS2u1IuVxb7UDa6-Rd4WzAvjLm8vjQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3399/orders/1",
+					"host": [
+						"localhost"
+					],
+					"port": "3399",
+					"path": [
+						"orders",
+						"1"
 					]
 				}
 			},

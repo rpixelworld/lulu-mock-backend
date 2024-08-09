@@ -2,4 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 tsc
-#npm run format:write
+npm run format:write
