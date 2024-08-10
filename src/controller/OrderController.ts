@@ -9,8 +9,6 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { User } from '../entity/User.entity';
 import { ShippingAddress } from '../entity/ShippingAddress.entity';
 import { OrderStatus } from '../common/OrderStatus';
-import user from '../route/user';
-import { create } from 'node:domain';
 
 class OrderController {
 	static async getUserOrders(req: Request, resp: Response) {
@@ -161,13 +159,16 @@ class OrderController {
 		}
 		try {
 			const repo = gDB.getRepository(Order);
-			const order = await repo.findOneOrFail({ where: { id: Number(orderId) } });
+			const order = await repo.findOne({ where: { id: Number(orderId) } });
 			if (!order) {
 				return resp
 					.status(404)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.ORDER_NOT_FOUND, 'order not found'));
 			}
 			order.status = OrderStatus.PAID;
+			order.paymentMethod = req.body.paymentMethod;
+			order.paymentComment = req.body.paymentComment
+
 			await repo.save(order);
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
 		} catch (e) {
@@ -189,7 +190,7 @@ class OrderController {
 			if (!order) {
 				return resp
 					.status(404)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.ORDER_NOT_FOUND, 'order not found'));
 			}
 			order.status = OrderStatus.CANCELLED;
 			await repo.save(order);
@@ -213,7 +214,7 @@ class OrderController {
 			if (!order) {
 				return resp
 					.status(404)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.ORDER_NOT_FOUND, 'order not found'));
 			}
 			order.status = OrderStatus.SHIPPED;
 			await repo.save(order);
