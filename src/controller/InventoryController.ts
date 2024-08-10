@@ -7,13 +7,13 @@ import { ErrorCode } from '../common/ErrorCode';
 import { validate } from 'class-validator';
 
 class InventoryController {
-	public static get repo() {
-		return gDB.getRepository(Inventory);
-	}
+	// public static get repo() {
+	// 	return gDB.getRepository(Inventory);
+	// }
 	// find all products with productId
 	static async getProductInventory(req: Request, resp: Response) {
 		try {
-			const products = await InventoryController.repo.find({ where: { productId: req.params.productId } });
+			const products = await gDB.getRepository(Inventory).find({ where: { productId: req.params.productId } });
 			if (!products || products.length === 0) {
 				logger.error('product is not found');
 				return resp
@@ -33,7 +33,7 @@ class InventoryController {
 	static async getInventory(req: Request, resp: Response) {
 		const { productId, colorId, size } = req.params;
 		try {
-			const product = await InventoryController.repo.find({
+			const product = await gDB.getRepository(Inventory).find({
 				where: {
 					productId: productId,
 					colorId: colorId,
@@ -41,13 +41,21 @@ class InventoryController {
 				},
 			});
 			// verify params
-			if (!product || product.length === 0 || !colorId || colorId.length === 0 || !size || size.length === 0) {
-				logger.error('product is not found');
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'product is not found'));
-			}
-
+			// if(!product || product.length==0) {
+			// 	const emptyIntentory = [{
+			// 		productId: productId,
+			// 		colorId: colorId,
+			// 		size: size,
+			// 		stock: 0
+			// 	}]
+			// 	return resp.status(200).json(ResponseHelper.generateSuccessResult(emptyIntentory));
+			// }
+			// if (!product || product.length === 0 || !colorId || colorId.length === 0 || !size || size.length === 0) {
+			// 	logger.error('product is not found');
+			// 	return resp
+			// 		.status(400)
+			// 		.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'product is not found'));
+			// }
 			return resp.status(200).json(ResponseHelper.generateSuccessResult(product));
 		} catch (error) {
 			logger.error('error getting product', error);
@@ -77,7 +85,7 @@ class InventoryController {
 
 		try {
 			// begin looking and comparing
-			const product = await InventoryController.repo.findOne({
+			const product = await gDB.getRepository(Inventory).findOne({
 				where: {
 					productId: productId,
 					colorId: colorId,
@@ -101,7 +109,7 @@ class InventoryController {
 					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'stock is not number'));
 			}
 			// save to the entity
-			await InventoryController.repo.save(product);
+			await gDB.getRepository(Inventory).save(product);
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(product));
 		} catch (error) {
 			logger.error('error getting product', error);
@@ -114,19 +122,19 @@ class InventoryController {
 	static async getInventoryOfProductAndColor(req: Request, resp: Response) {
 		const { productId, colorId } = req.params;
 		try {
-			const product = await InventoryController.repo.find({
+			const product = await gDB.getRepository(Inventory).find({
 				where: {
 					productId: productId,
 					colorId: colorId,
 				},
 			});
 			// verify params
-			if (!product || product.length === 0 || !colorId || colorId.length === 0) {
-				logger.error('product is not found');
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'product is not found'));
-			}
+			// if (!product || product.length === 0 || !colorId || colorId.length === 0) {
+			// 	logger.error('product is not found');
+			// 	return resp
+			// 		.status(400)
+			// 		.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'product is not found'));
+			// }
 
 			return resp.status(200).json(ResponseHelper.generateSuccessResult(product));
 		} catch (error) {
