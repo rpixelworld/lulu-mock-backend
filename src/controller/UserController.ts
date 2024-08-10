@@ -107,6 +107,48 @@ class UserController {
 		}
 	}
 
+	static async adminLogin(req: Request, resp: Response) {
+		const { email, password } = req.body;
+		logger.info(`User ${email} trying to login.`);
+		const db = gDB.getRepository(User);
+		try {
+			let user = await db.findOneBy({ email: email });
+			if (!user) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, `User not exist.`));
+			}
+			let loginSuccess = await user.comparePassword(password);
+			if (!loginSuccess) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password Incorrect.`));
+			}
+
+			if(!user.isAdmin) {
+				return resp.status(403).send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, "Not admin user."))
+			}
+
+			logger.info(`user ${email} login successfullym generating jwt token`);
+			const token = jwt.sign({ uid: user.id, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
+				expiresIn: '2h',
+			});
+
+			return resp.status(200).send(
+				ResponseHelper.generateSuccessResult({
+					userId: user.id,
+					firstName: user.firstName,
+					email: user.email,
+					isAdmin: user.isAdmin,
+					token: token,
+				})
+			);
+		} catch (e) {
+			logger.error('find a user failed', e);
+			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		}
+	}
+
 	static async resetPassword(req: Request, resp: Response) {
 		const { email, password } = req.body;
 		logger.info(`User ${email} trying to reset password.`);
