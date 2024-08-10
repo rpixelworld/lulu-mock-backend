@@ -9,6 +9,8 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { User } from '../entity/User.entity';
 import { ShippingAddress } from '../entity/ShippingAddress.entity';
 import { OrderStatus } from '../common/OrderStatus';
+import user from '../route/user';
+import { create } from 'node:domain';
 
 class OrderController {
 	static async getUserOrders(req: Request, resp: Response) {
@@ -150,11 +152,77 @@ class OrderController {
 
 	static async download(req: Request, resp: Response) {}
 
-	static async payOrder(req: Request, resp: Response) {}
+	static async payOrder(req: Request, resp: Response) {
+		const { orderId } = req.params;
+		if (!Number.isInteger(Number(orderId))) {
+			return resp
+				.status(400)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid order id'));
+		}
+		try {
+			const repo = gDB.getRepository(Order);
+			const order = await repo.findOneOrFail({ where: { id: Number(orderId) } });
+			if (!order) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+			}
+			order.status = OrderStatus.PAID;
+			await repo.save(order);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
+		} catch (e) {
+			logger.error('Exception while paying for order', e);
+			return resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		}
+	}
 
-	static async cancelOrder(req: Request, resp: Response) {}
+	static async cancelOrder(req: Request, resp: Response) {
+		const { orderId } = req.params;
+		if (!Number.isInteger(Number(orderId))) {
+			return resp
+				.status(400)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid order id'));
+		}
+		try {
+			const repo = gDB.getRepository(Order);
+			const order = await repo.findOneOrFail({ where: { id: Number(orderId) } });
+			if (!order) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+			}
+			order.status = OrderStatus.CANCELLED;
+			await repo.save(order);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
+		} catch (e) {
+			logger.error('Exception while paying for order', e);
+			return resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		}
+	}
 
-	static async shipOrder(req: Request, resp: Response) {}
+	static async shipOrder(req: Request, resp: Response) {
+		const { orderId } = req.params;
+		if (!Number.isInteger(Number(orderId))) {
+			return resp
+				.status(400)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid order id'));
+		}
+		try {
+			const repo = gDB.getRepository(Order);
+			const order = await repo.findOneOrFail({ where: { id: Number(orderId) } });
+			if (!order) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.PRODUCT_NOT_FOUND, 'order not found'));
+			}
+			order.status = OrderStatus.SHIPPED;
+			await repo.save(order);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
+		} catch (e) {
+			logger.error('Exception while paying for order', e);
+			return resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		}
+	}
 }
 
 export default OrderController;
