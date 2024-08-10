@@ -167,7 +167,7 @@ class OrderController {
 			}
 			order.status = OrderStatus.PAID;
 			order.paymentMethod = req.body.paymentMethod;
-			order.paymentComment = req.body.paymentComment
+			order.paymentComment = req.body.paymentComment;
 
 			await repo.save(order);
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
