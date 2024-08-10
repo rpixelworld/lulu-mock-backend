@@ -125,8 +125,10 @@ class UserController {
 					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password Incorrect.`));
 			}
 
-			if(!user.isAdmin) {
-				return resp.status(403).send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, "Not admin user."))
+			if (!user.isAdmin) {
+				return resp
+					.status(403)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, 'Not admin user.'));
 			}
 
 			logger.info(`user ${email} login successfullym generating jwt token`);
