@@ -6,6 +6,8 @@ import ResponseHelper from './ResponseHelper';
 import { logger } from '../LoggerHelper';
 import { ErrorCode } from '../common/ErrorCode';
 import * as jwt from 'jsonwebtoken';
+import { Order } from '../entity/Order.entity';
+import { ShippingAddress } from '../entity/ShippingAddress.entity';
 
 class UserController {
 	static async all(req: Request, resp: Response) {
@@ -180,7 +182,38 @@ class UserController {
 
 	static async getAllShippingAddresses(req: Request, resp: Response) {}
 
-	static async addShippingAddress(req: Request, resp: Response) {}
+	static async addShippingAddress(req: Request, resp: Response) {
+		const { userId } = req.body;
+
+		if (userId && !Number.isInteger(Number(userId))) {
+			return resp.status(400)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
+		}
+		try {
+			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
+			if (!user) {
+				return resp.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
+			}
+
+			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
+			shippingAddress.user = user
+			shippingAddress.countryCode = 'CA'
+			const errors = await validate(shippingAddress);
+			if (errors.length > 0) {
+				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+			}
+
+			await gDB.getRepository(ShippingAddress).save(shippingAddress);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(shippingAddress));
+		}
+		catch (e) {
+			logger.error('error place order', e);
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'internal server error'));
+		}
+	}
 
 	static async deleteShippingAddress(req: Request, resp: Response) {}
 }
