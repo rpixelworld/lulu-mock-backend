@@ -186,19 +186,21 @@ class UserController {
 		const { userId } = req.body;
 
 		if (userId && !Number.isInteger(Number(userId))) {
-			return resp.status(400)
+			return resp
+				.status(400)
 				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
 		}
 		try {
 			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
 			if (!user) {
-				return resp.status(400)
+				return resp
+					.status(400)
 					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
 			}
 
 			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
-			shippingAddress.user = user
-			shippingAddress.countryCode = 'CA'
+			shippingAddress.user = user;
+			shippingAddress.countryCode = 'CA';
 			const errors = await validate(shippingAddress);
 			if (errors.length > 0) {
 				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
@@ -206,8 +208,7 @@ class UserController {
 
 			await gDB.getRepository(ShippingAddress).save(shippingAddress);
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(shippingAddress));
-		}
-		catch (e) {
+		} catch (e) {
 			logger.error('error place order', e);
 			return resp
 				.status(500)
