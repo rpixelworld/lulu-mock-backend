@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
 import { Order } from '../entity/Order.entity';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import ResponseHelper from "./ResponseHelper";
-import {ErrorCode} from "../common/ErrorCode";
 
 export class ReceiptController {
 	static async getReceiptPDF(req: Request, res: Response): Promise<Response> {
@@ -11,8 +9,7 @@ export class ReceiptController {
 			const id = parseInt(req.params.orderId);
 
 			if (isNaN(id)) {
-				return res.status(400).send(
-					ResponseHelper.generateFailureResult(ErrorCode.	ORDER_NOT_FOUND , 'Order not found'));
+				return res.status(400).send('Invalid Order ID');
 			}
 
 			const db = gDB.getRepository(Order);
@@ -22,8 +19,7 @@ export class ReceiptController {
 			});
 
 			if (!order) {
-				return res.status(400).send(
-					ResponseHelper.generateFailureResult(ErrorCode.	ORDER_NOT_FOUND , 'Order not found'));
+				return res.status(404).send('Receipt not found');
 			}
 
 			const pdfDoc = await PDFDocument.create();
@@ -87,14 +83,7 @@ export class ReceiptController {
 			});
 
 			// Loop through order items
-			page.drawText(`Items details:`, {
-				x: 50,
-				y: 570,
-				font,
-				size: 17,
-			});
-
-			let currentItemY = 570;
+			let currentItemY = 580;
 			order.orderItems.forEach((item, index) => {
 				// Update Y position for each item
 				currentItemY -= 30;
@@ -181,7 +170,7 @@ export class ReceiptController {
 			res.setHeader('Expires', '0');
 			return res.end(pdfBytes);
 		} catch (error) {
-			res.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, error.driverError));
+			return res.status(500).send(`Error generating PDF: ${error.message}`);
 		}
 	}
 }
