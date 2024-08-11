@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
 import { Order } from '../entity/Order.entity';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import ResponseHelper from "./ResponseHelper";
-import {ErrorCode} from "../common/ErrorCode";
+import ResponseHelper from './ResponseHelper';
+import { ErrorCode } from '../common/ErrorCode';
 
 export class ReceiptController {
 	static async getReceiptPDF(req: Request, res: Response): Promise<Response> {
@@ -11,8 +11,9 @@ export class ReceiptController {
 			const id = parseInt(req.params.orderId);
 
 			if (isNaN(id)) {
-				return res.status(400).send(
-					ResponseHelper.generateFailureResult(ErrorCode.	ORDER_NOT_FOUND , 'Order not found'));
+				return res
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.ORDER_NOT_FOUND, 'Order not found'));
 			}
 
 			const db = gDB.getRepository(Order);
@@ -22,8 +23,9 @@ export class ReceiptController {
 			});
 
 			if (!order) {
-				return res.status(400).send(
-					ResponseHelper.generateFailureResult(ErrorCode.	ORDER_NOT_FOUND , 'Order not found'));
+				return res
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.ORDER_NOT_FOUND, 'Order not found'));
 			}
 
 			const pdfDoc = await PDFDocument.create();
