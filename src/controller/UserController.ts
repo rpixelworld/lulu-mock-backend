@@ -201,7 +201,9 @@ class UserController {
 		if (!Number.isInteger(Number(userId)) || !Number.isInteger(Number(id))) {
 			return resp
 				.status(400)
-				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id or address id'));
+				.send(
+					ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id or address id')
+				);
 		}
 
 		try {
@@ -215,8 +217,8 @@ class UserController {
 			const shippingAddress: ShippingAddress = await gDB.getRepository(ShippingAddress).findOne({
 				where: {
 					id: id,
-					user: userId
-				}
+					user: userId,
+				},
 			});
 
 			if (!shippingAddress) {
@@ -234,8 +236,6 @@ class UserController {
 				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
 		}
 	}
-
-
 }
 
 export default UserController;
