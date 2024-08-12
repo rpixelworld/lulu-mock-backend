@@ -33,7 +33,7 @@ class UserController {
 		const db = gDB.getRepository(User);
 		try {
 			await db.save(user);
-			delete user.password
+			delete user.password;
 
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
@@ -72,44 +72,37 @@ class UserController {
 		}
 	}
 
-
-
 	static async login(req: Request, resp: Response) {
-
 		let result = await validateEmailPassword(req);
 		if (!(result instanceof User)) {
-			return resp.status(400).send(result)
+			return resp.status(400).send(result);
 		}
 
-		const user: User = result as User
-		delete user.password
+		const user: User = result as User;
+		delete user.password;
 
 		logger.info(`user email=${user.email} login successfully generating jwt token`);
-		const token = generateJwt(user)
+		const token = generateJwt(user);
 
-		return resp.status(200).send(ResponseHelper.generateSuccessResult({...user, token: token}));
-
+		return resp.status(200).send(ResponseHelper.generateSuccessResult({ ...user, token: token }));
 	}
 
 	static async adminLogin(req: Request, resp: Response) {
-
 		let result = await validateEmailPassword(req);
 		if (!(result instanceof User)) {
-			return resp.status(400).send(result)
+			return resp.status(400).send(result);
 		}
 
-		const user: User = result as User
+		const user: User = result as User;
 		if (!user.isAdmin) {
-			return resp
-				.status(403)
-				.send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, 'Not admin user.'));
+			return resp.status(403).send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, 'Not admin user.'));
 		}
 
-		delete user.password
+		delete user.password;
 		logger.info(`user email=${user.email} login successfully generating jwt token`);
-		const token = generateJwt(user)
+		const token = generateJwt(user);
 
-		return resp.status(200).send(ResponseHelper.generateSuccessResult({...user, token: token}));
+		return resp.status(200).send(ResponseHelper.generateSuccessResult({ ...user, token: token }));
 	}
 
 	static async resetPassword(req: Request, resp: Response) {
@@ -126,11 +119,9 @@ class UserController {
 			user.password = password;
 			await db.save(user);
 
-			delete user.password
+			delete user.password;
 			logger.info(`user ${email} password reset successfully`);
-			return resp.status(200).send(
-				ResponseHelper.generateSuccessResult(user)
-			);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
 			logger.error('reset password failed', e);
 			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
@@ -140,10 +131,9 @@ class UserController {
 	static async getAllShippingAddresses(req: Request, resp: Response) {}
 
 	static async addShippingAddress(req: Request, resp: Response) {
-
 		try {
-			const user:User = req['loginUser']
-			logger.debug(user)
+			const user: User = req['loginUser'];
+			logger.debug(user);
 			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
 			shippingAddress.user = user;
 			// shippingAddress.countryCode = 'CA';
@@ -167,21 +157,23 @@ class UserController {
 
 export default UserController;
 
-async function validateEmailPassword(req: Request): Promise<{status: string, errorCode:string, message:string} | User> {
+async function validateEmailPassword(
+	req: Request
+): Promise<{ status: string; errorCode: string; message: string } | User> {
 	const { email, password } = req.body;
-	logger.info(`Validating email=${email}, password=${password.substring(0,3)}********`);
+	logger.info(`Validating email=${email}, password=${password.substring(0, 3)}********`);
 	const db = gDB.getRepository(User);
 	try {
 		let user = await db.findOne({
 			where: { email: email },
-			select: ['id', 'firstName', 'lastName', 'email', 'password', 'isAdmin']
+			select: ['id', 'firstName', 'lastName', 'email', 'password', 'isAdmin'],
 		});
 		if (!user) {
 			logger.error(`email=${email} not found`);
 			return {
 				status: 'failed',
 				errorCode: ErrorCode.USER_NOT_EXIST,
-				message: `User not exist.`
+				message: `User not exist.`,
 			};
 		}
 		let loginSuccess = await user.comparePassword(password);
@@ -190,21 +182,20 @@ async function validateEmailPassword(req: Request): Promise<{status: string, err
 			return {
 				status: 'failed',
 				errorCode: ErrorCode.PASSWORD_INCORRECT,
-				message: `Password Incorrect.`
+				message: `Password Incorrect.`,
 			};
 		}
 		return user;
-	}
-	catch (e) {
+	} catch (e) {
 		return {
 			status: 'failed',
 			errorCode: ErrorCode.DB_ERROR,
-			message: e.e.driverError
+			message: e.e.driverError,
 		};
 	}
 }
 
-function generateJwt(user: User) :string {
-	const token = jwt.sign({ user: user }, process.env.JWT_SECRET, {expiresIn: '2h'});
-	return token
+function generateJwt(user: User): string {
+	const token = jwt.sign({ user: user }, process.env.JWT_SECRET, { expiresIn: '2h' });
+	return token;
 }

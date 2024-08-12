@@ -23,7 +23,7 @@ export class Order {
 	@Column({ type: 'int', nullable: false })
 	status: OrderStatus;
 
-	@OneToMany(() => OrderItem, orderItem => orderItem.order, {cascade:true})
+	@OneToMany(() => OrderItem, orderItem => orderItem.order, { cascade: true })
 	orderItems: OrderItem[];
 
 	@Column()

@@ -78,34 +78,45 @@ class OrderController {
 		try {
 			const { isNewShippingAddress, shippingAddress } = req.body;
 
-			const user: User = req['loginUser']
+			const user: User = req['loginUser'];
 			if (!user) {
-				return resp.status(400)
+				return resp
+					.status(400)
 					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
 			}
 
 			let order: Order = Object.assign(new Order(), req.body);
-			logger.debug(order)
+			logger.debug(order);
 			order.user = user;
 
-			if(isNewShippingAddress) {
-				logger.info('saving new shipping address to userid='+user.id);
-				await gDB.getRepository(ShippingAddress).save(shippingAddress)
+			if (isNewShippingAddress) {
+				logger.info('saving new shipping address to userid=' + user.id);
+				await gDB.getRepository(ShippingAddress).save(shippingAddress);
 				order.shippingAddress = shippingAddress;
-			}
-			else {
+			} else {
 				if (shippingAddress.id && !Number.isInteger(Number(shippingAddress.id))) {
 					return resp
 						.status(400)
 						.send(
-							ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid shippingAddress id')
+							ResponseHelper.generateFailureResult(
+								ErrorCode.VALIDATION_ERROR,
+								'Invalid shippingAddress id'
+							)
 						);
 				}
 
-				const existingShippingAddress = await gDB.getRepository(ShippingAddress).findOne({ where: { id: shippingAddress.id } });
+				const existingShippingAddress = await gDB
+					.getRepository(ShippingAddress)
+					.findOne({ where: { id: shippingAddress.id } });
 				if (!existingShippingAddress) {
-					return resp.status(400)
-						.send(ResponseHelper.generateFailureResult(ErrorCode.ADDRESS_NOT_EXIST, 'Shipping address not exist'));
+					return resp
+						.status(400)
+						.send(
+							ResponseHelper.generateFailureResult(
+								ErrorCode.ADDRESS_NOT_EXIST,
+								'Shipping address not exist'
+							)
+						);
 				}
 				order.shippingAddress = existingShippingAddress;
 			}
@@ -229,7 +240,6 @@ class OrderController {
 export default OrderController;
 
 function validateQueryOrder(req: Request): string {
-
 	const { orderNumber, orderStatus } = req.body;
 	if (orderNumber && !Number.isInteger(Number(orderNumber))) {
 		return 'Invalid order number';
@@ -248,7 +258,7 @@ function validateQueryOrder(req: Request): string {
 function createQueryBuilder(repo: Repository<Order>, req: Request): SelectQueryBuilder<Order> {
 	let queryBuilder: SelectQueryBuilder<Order> = repo.createQueryBuilder('order');
 
-	const user:User = req['loginUser']
+	const user: User = req['loginUser'];
 	const { email, orderNumber, orderStatus } = req.body;
 	if (user.id || email) {
 		queryBuilder.innerJoin('order.user', 'user');
