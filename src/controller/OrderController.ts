@@ -9,6 +9,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { User } from '../entity/User.entity';
 import { ShippingAddress } from '../entity/ShippingAddress.entity';
 import { OrderStatus } from '../common/OrderStatus';
+import { TaxMaster } from '../entity/TaxMaster.entity';
 
 class OrderController {
 	static async getUserOrders(req: Request, resp: Response) {
@@ -93,33 +94,40 @@ class OrderController {
 				logger.info('saving new shipping address to userid=' + user.id);
 				await gDB.getRepository(ShippingAddress).save(shippingAddress);
 				order.shippingAddress = shippingAddress;
-			} else {
-				if (shippingAddress.id && !Number.isInteger(Number(shippingAddress.id))) {
-					return resp
-						.status(400)
-						.send(
-							ResponseHelper.generateFailureResult(
-								ErrorCode.VALIDATION_ERROR,
-								'Invalid shippingAddress id'
-							)
-						);
-				}
-
-				const existingShippingAddress = await gDB
-					.getRepository(ShippingAddress)
-					.findOne({ where: { id: shippingAddress.id } });
-				if (!existingShippingAddress) {
-					return resp
-						.status(400)
-						.send(
-							ResponseHelper.generateFailureResult(
-								ErrorCode.ADDRESS_NOT_EXIST,
-								'Shipping address not exist'
-							)
-						);
-				}
-				order.shippingAddress = existingShippingAddress;
 			}
+			// else {
+			// 	if (shippingAddress.id && !Number.isInteger(Number(shippingAddress.id))) {
+			// 		return resp
+			// 			.status(400)
+			// 			.send(
+			// 				ResponseHelper.generateFailureResult(
+			// 					ErrorCode.VALIDATION_ERROR,
+			// 					'Invalid shippingAddress id'
+			// 				)
+			// 			);
+			// 	}
+
+				// const existingShippingAddress = await gDB
+				// 	.getRepository(ShippingAddress)
+				// 	.findOne({ where: { id: shippingAddress.id } });
+				// if (!existingShippingAddress) {
+				// 	return resp
+				// 		.status(400)
+				// 		.send(
+				// 			ResponseHelper.generateFailureResult(
+				// 				ErrorCode.ADDRESS_NOT_EXIST,
+				// 				'Shipping address not exist'
+				// 			)
+				// 		);
+				// }
+				// order.shippingAddress = existingShippingAddress;
+			// }
+			const province = shippingAddress.province
+			const taxRate = await gDB.getRepository(TaxMaster).findOne({where: {province: province}})
+			const totalRate = (taxRate.gst?taxRate.gst:0) + (taxRate.pst?taxRate.pst:0) + (taxRate.hst?taxRate.hst:0)
+			const tax = order.totalAmount*totalRate/100
+			order.tax = tax
+			order.orderTotalAmount = order.totalAmount + tax + order.deliveryFee
 
 			const errors = await validate(order);
 			if (errors.length > 0) {

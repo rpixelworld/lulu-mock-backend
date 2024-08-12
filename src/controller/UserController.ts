@@ -75,7 +75,7 @@ class UserController {
 	static async login(req: Request, resp: Response) {
 		let result = await validateEmailPassword(req);
 		if (!(result instanceof User)) {
-			return resp.status(400).send(result);
+			return resp.status(400).send(ResponseHelper.generateFailureResultWithError(result));
 		}
 
 		const user: User = result as User;
@@ -90,7 +90,7 @@ class UserController {
 	static async adminLogin(req: Request, resp: Response) {
 		let result = await validateEmailPassword(req);
 		if (!(result instanceof User)) {
-			return resp.status(400).send(result);
+			return resp.status(400).send(ResponseHelper.generateFailureResultWithError(result));
 		}
 
 		const user: User = result as User;
@@ -159,7 +159,7 @@ export default UserController;
 
 async function validateEmailPassword(
 	req: Request
-): Promise<{ status: string; errorCode: string; message: string } | User> {
+): Promise<{ errorCode: ErrorCode; message: string } | User> {
 	const { email, password } = req.body;
 	logger.info(`Validating email=${email}, password=${password.substring(0, 3)}********`);
 	const db = gDB.getRepository(User);
@@ -171,7 +171,6 @@ async function validateEmailPassword(
 		if (!user) {
 			logger.error(`email=${email} not found`);
 			return {
-				status: 'failed',
 				errorCode: ErrorCode.USER_NOT_EXIST,
 				message: `User not exist.`,
 			};
@@ -180,7 +179,6 @@ async function validateEmailPassword(
 		if (!loginSuccess) {
 			logger.error(`email=${email} password incorrect`);
 			return {
-				status: 'failed',
 				errorCode: ErrorCode.PASSWORD_INCORRECT,
 				message: `Password Incorrect.`,
 			};
@@ -188,7 +186,6 @@ async function validateEmailPassword(
 		return user;
 	} catch (e) {
 		return {
-			status: 'failed',
 			errorCode: ErrorCode.DB_ERROR,
 			message: e.e.driverError,
 		};

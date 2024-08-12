@@ -53,6 +53,9 @@ export class Order {
 	@Column({ nullable: false, type: 'float' })
 	totalAmount: number;
 
+	@Column({ nullable: false, type: 'float' })
+	orderTotalAmount: number;
+
 	@Column({ nullable: false })
 	isGift: boolean;
 

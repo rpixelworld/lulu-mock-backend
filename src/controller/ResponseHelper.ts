@@ -11,8 +11,18 @@ class ResponseHelper {
 	static generateFailureResult(errorCode: ErrorCode, error: any) {
 		return {
 			status: 'failed',
-			errorCode: errorCode,
-			message: error,
+			error: {
+				errorCode: errorCode,
+				message: error,
+			}
+
+		};
+	}
+	static generateFailureResultWithError(error: {errorCode: ErrorCode, message: any}) {
+		return {
+			status: 'failed',
+			error: error
+
 		};
 	}
 
