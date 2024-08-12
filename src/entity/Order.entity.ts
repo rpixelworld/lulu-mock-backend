@@ -60,15 +60,15 @@ export class Order {
 	isGift: boolean;
 
 	@Column({ nullable: true })
-	@Length(0, 32)
+	// @Length(0, 32)
 	giftTo: string;
 
 	@Column({ nullable: true })
-	@Length(0, 32)
+	// @Length(0, 32)
 	giftFrom: string;
 
 	@Column({ nullable: true })
-	@Length(0, 1024)
+	// @Length(0, 1024)
 	giftMessage: string;
 
 	@Column({ nullable: true, type: 'enum', enum: PaymentMethod })

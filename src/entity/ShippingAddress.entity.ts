@@ -28,6 +28,9 @@ export class ShippingAddress {
 	@PrimaryGeneratedColumn()
 	id: number;
 
+	@Column ({nullable: false, default:true})
+	inUsersAddressList: boolean
+
 	@Column({ nullable: false })
 	@Length(1, 300)
 	firstName: string;

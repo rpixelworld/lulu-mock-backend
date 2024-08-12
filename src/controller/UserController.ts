@@ -53,7 +53,16 @@ class UserController {
 
 		const db = gDB.getRepository(User);
 		try {
-			let user = await db.findOne({ where: { id: Number(userId) }, relations: ['shippingAddresses'] });
+
+			let user = await db.createQueryBuilder('user')
+				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress')
+				.where('id=:userId', {userId: Number(userId)})
+				.where('shippingAddress.inUsersAddressList=1')
+				.getOne()
+
+			// let user = await db.findOne({
+			// 	where: { id: Number(userId) },
+			// 	relations: ['shippingAddresses'] });
 			if (!user) {
 				return resp
 					.status(400)

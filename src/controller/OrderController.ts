@@ -90,8 +90,12 @@ class OrderController {
 			logger.debug(order);
 			order.user = user;
 
-			if (isNewShippingAddress) {
+			if (!shippingAddress.id) {
 				logger.info('saving new shipping address to userid=' + user.id);
+				if(!isNewShippingAddress) {
+					shippingAddress.inUsersAddressList = false;
+				}
+				shippingAddress.user = user
 				await gDB.getRepository(ShippingAddress).save(shippingAddress);
 				order.shippingAddress = shippingAddress;
 			}
@@ -126,7 +130,7 @@ class OrderController {
 			const taxRate = await gDB.getRepository(TaxMaster).findOne({ where: { province: province } });
 			const totalRate =
 				(taxRate.gst ? taxRate.gst : 0) + (taxRate.pst ? taxRate.pst : 0) + (taxRate.hst ? taxRate.hst : 0);
-			const tax = (order.totalAmount * totalRate) / 100;
+			const tax = ((order.totalAmount + order.deliveryFee) * totalRate) / 100;
 			order.tax = tax;
 			order.orderTotalAmount = order.totalAmount + tax + order.deliveryFee;
 
