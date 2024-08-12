@@ -92,10 +92,10 @@ class OrderController {
 
 			if (!shippingAddress.id) {
 				logger.info('saving new shipping address to userid=' + user.id);
-				if(!isNewShippingAddress) {
+				if (!isNewShippingAddress) {
 					shippingAddress.inUsersAddressList = false;
 				}
-				shippingAddress.user = user
+				shippingAddress.user = user;
 				await gDB.getRepository(ShippingAddress).save(shippingAddress);
 				order.shippingAddress = shippingAddress;
 			}

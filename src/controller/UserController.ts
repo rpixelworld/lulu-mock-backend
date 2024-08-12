@@ -53,12 +53,12 @@ class UserController {
 
 		const db = gDB.getRepository(User);
 		try {
-
-			let user = await db.createQueryBuilder('user')
+			let user = await db
+				.createQueryBuilder('user')
 				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress')
-				.where('id=:userId', {userId: Number(userId)})
+				.where('id=:userId', { userId: Number(userId) })
 				.where('shippingAddress.inUsersAddressList=1')
-				.getOne()
+				.getOne();
 
 			// let user = await db.findOne({
 			// 	where: { id: Number(userId) },
