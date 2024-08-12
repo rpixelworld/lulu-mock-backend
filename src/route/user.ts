@@ -8,7 +8,7 @@ userRouter.get('/:userId', UserController.one);
 userRouter.get('/', [validateAdminJwt], UserController.all);
 
 userRouter.get('/:userId/addresses', [validateJwt], UserController.getAllShippingAddresses);
-userRouter.post('/:userId/addresses', [validateJwt], UserController.addShippingAddress);
+userRouter.post('/addresses', [validateJwt], UserController.addShippingAddress);
 userRouter.delete('/:userId/addresses/:addressId', [validateJwt], UserController.deleteShippingAddress);
 
 export default userRouter;

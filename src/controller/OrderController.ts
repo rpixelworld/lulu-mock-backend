@@ -76,45 +76,45 @@ class OrderController {
 	static async placeOrder(req: Request, resp: Response) {
 		logger.info('placing order');
 		try {
-			const { userId, shippingAddressId } = req.body;
+			const { isNewShippingAddress, shippingAddress } = req.body;
 
-			if (userId && !Number.isInteger(Number(userId))) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
-			}
-			if (shippingAddressId && !Number.isInteger(Number(shippingAddressId))) {
-				return resp
-					.status(400)
-					.send(
-						ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid shippingAddress id')
-					);
-			}
-
-			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
+			const user: User = req['loginUser']
 			if (!user) {
-				return resp
-					.status(400)
+				return resp.status(400)
 					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
-			}
-			const shippingAddress = await gDB
-				.getRepository(ShippingAddress)
-				.findOne({ where: { id: shippingAddressId } });
-			if (!shippingAddress) {
-				return resp
-					.status(400)
-					.send(
-						ResponseHelper.generateFailureResult(ErrorCode.ADDRESS_NOT_EXIST, 'Shipping address not exist')
-					);
 			}
 
 			let order: Order = Object.assign(new Order(), req.body);
+			logger.debug(order)
+			order.user = user;
+
+			if(isNewShippingAddress) {
+				logger.info('saving new shipping address to userid='+user.id);
+				await gDB.getRepository(ShippingAddress).save(shippingAddress)
+				order.shippingAddress = shippingAddress;
+			}
+			else {
+				if (shippingAddress.id && !Number.isInteger(Number(shippingAddress.id))) {
+					return resp
+						.status(400)
+						.send(
+							ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid shippingAddress id')
+						);
+				}
+
+				const existingShippingAddress = await gDB.getRepository(ShippingAddress).findOne({ where: { id: shippingAddress.id } });
+				if (!existingShippingAddress) {
+					return resp.status(400)
+						.send(ResponseHelper.generateFailureResult(ErrorCode.ADDRESS_NOT_EXIST, 'Shipping address not exist'));
+				}
+				order.shippingAddress = existingShippingAddress;
+			}
+
 			const errors = await validate(order);
 			if (errors.length > 0) {
 				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
 			}
-			order.user = user;
-			order.shippingAddress = shippingAddress;
+
 			order.status = OrderStatus.CREATED;
 
 			await gDB.getRepository(Order).save(order);
@@ -139,7 +139,7 @@ class OrderController {
 		try {
 			const order: Order = await gDB.getRepository(Order).findOne({
 				where: { id: Number(orderId) },
-				relations: ['orderItems'],
+				relations: ['shippingAddress', 'orderItems'],
 			});
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
 		} catch (e) {
@@ -229,13 +229,8 @@ class OrderController {
 export default OrderController;
 
 function validateQueryOrder(req: Request): string {
-	const { userId } = req.params;
-	logger.info('find orders by userId=', userId, Number.isInteger(userId));
-	if (userId && !Number.isInteger(Number(userId))) {
-		return 'Invalid user id';
-	}
 
-	const { email, orderNumber, orderStatus } = req.body;
+	const { orderNumber, orderStatus } = req.body;
 	if (orderNumber && !Number.isInteger(Number(orderNumber))) {
 		return 'Invalid order number';
 	}
@@ -253,14 +248,14 @@ function validateQueryOrder(req: Request): string {
 function createQueryBuilder(repo: Repository<Order>, req: Request): SelectQueryBuilder<Order> {
 	let queryBuilder: SelectQueryBuilder<Order> = repo.createQueryBuilder('order');
 
-	const { userId } = req.params;
+	const user:User = req['loginUser']
 	const { email, orderNumber, orderStatus } = req.body;
-	if (userId || email) {
+	if (user.id || email) {
 		queryBuilder.innerJoin('order.user', 'user');
-		if (userId) {
-			queryBuilder.where('user.id=:userId', { userId: Number(userId) });
-		} else {
+		if (email) {
 			queryBuilder.where('user.email=:email', { email: email });
+		} else {
+			queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
 		}
 	}
 	if (orderNumber) {
