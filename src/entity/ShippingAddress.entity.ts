@@ -8,13 +8,15 @@ import {
 	OneToMany,
 } from 'typeorm';
 import {
-	IsEnum, isPhoneNumber,
+	IsEnum,
+	isPhoneNumber,
 	IsPhoneNumber,
 	IsPostalCode,
 	Length,
 	Max,
 	Min,
-	registerDecorator, ValidationArguments,
+	registerDecorator,
+	ValidationArguments,
 	ValidationOptions,
 } from 'class-validator';
 import { Province } from '../common/Province';
@@ -35,7 +37,9 @@ export class ShippingAddress {
 	lastName: string;
 
 	@Column({ nullable: false })
-	@IsCanadianPhoneWithoutCountryCode({ message: 'Phone number should be a valid Canadian number without the +1 country code.' })
+	@IsCanadianPhoneWithoutCountryCode({
+		message: 'Phone number should be a valid Canadian number without the +1 country code.',
+	})
 	phoneNumber: string;
 
 	@Column({ nullable: false })
@@ -74,7 +78,7 @@ export class ShippingAddress {
 	updatedAt: Date;
 }
 
-	function IsCanadianPhoneWithoutCountryCode(validationOptions?: ValidationOptions) {
+function IsCanadianPhoneWithoutCountryCode(validationOptions?: ValidationOptions) {
 	return function (object: Object, propertyName: string) {
 		registerDecorator({
 			name: 'isCanadianPhoneWithoutCountryCode',
@@ -94,7 +98,7 @@ export class ShippingAddress {
 				},
 				defaultMessage(args: ValidationArguments) {
 					return 'Phone number must be a valid 10-digit Canadian phone number without the +1 country code';
-				}
+				},
 			},
 		});
 	};

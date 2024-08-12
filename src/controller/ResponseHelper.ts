@@ -14,15 +14,13 @@ class ResponseHelper {
 			error: {
 				errorCode: errorCode,
 				message: error,
-			}
-
+			},
 		};
 	}
-	static generateFailureResultWithError(error: {errorCode: ErrorCode, message: any}) {
+	static generateFailureResultWithError(error: { errorCode: ErrorCode; message: any }) {
 		return {
 			status: 'failed',
-			error: error
-
+			error: error,
 		};
 	}
 

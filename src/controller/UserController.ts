@@ -157,9 +157,7 @@ class UserController {
 
 export default UserController;
 
-async function validateEmailPassword(
-	req: Request
-): Promise<{ errorCode: ErrorCode; message: string } | User> {
+async function validateEmailPassword(req: Request): Promise<{ errorCode: ErrorCode; message: string } | User> {
 	const { email, password } = req.body;
 	logger.info(`Validating email=${email}, password=${password.substring(0, 3)}********`);
 	const db = gDB.getRepository(User);
