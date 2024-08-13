@@ -7,7 +7,6 @@ import {
 	UpdateDateColumn,
 	BeforeInsert,
 	BeforeUpdate,
-	OneToOne,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
@@ -38,7 +37,7 @@ export class User {
 	@Length(5, 500)
 	email: string;
 
-	@Column({ nullable: false })
+	@Column({ nullable: false, select: false })
 	@Length(6, 100)
 	password: string;
 

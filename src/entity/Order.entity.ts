@@ -23,7 +23,7 @@ export class Order {
 	@Column({ type: 'int', nullable: false })
 	status: OrderStatus;
 
-	@OneToMany(() => OrderItem, orderItem => orderItem.order)
+	@OneToMany(() => OrderItem, orderItem => orderItem.order, { cascade: true })
 	orderItems: OrderItem[];
 
 	@Column()
@@ -53,19 +53,22 @@ export class Order {
 	@Column({ nullable: false, type: 'float' })
 	totalAmount: number;
 
+	@Column({ nullable: false, type: 'float' })
+	orderTotalAmount: number;
+
 	@Column({ nullable: false })
 	isGift: boolean;
 
 	@Column({ nullable: true })
-	@Length(0, 32)
+	// @Length(0, 32)
 	giftTo: string;
 
 	@Column({ nullable: true })
-	@Length(0, 32)
+	// @Length(0, 32)
 	giftFrom: string;
 
 	@Column({ nullable: true })
-	@Length(0, 1024)
+	// @Length(0, 1024)
 	giftMessage: string;
 
 	@Column({ nullable: true, type: 'enum', enum: PaymentMethod })

@@ -33,7 +33,8 @@ class UserController {
 		const db = gDB.getRepository(User);
 		try {
 			await db.save(user);
-			user.password = password.substring(0, 3) + '********';
+			delete user.password;
+
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
 			logger.error('create a user failed', e);
@@ -52,7 +53,16 @@ class UserController {
 
 		const db = gDB.getRepository(User);
 		try {
-			let user = await db.findOne({ where: { id: Number(userId) }, relations: ['shippingAddresses'] });
+			let user = await db
+				.createQueryBuilder('user')
+				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress')
+				.where('id=:userId', { userId: Number(userId) })
+				.where('shippingAddress.inUsersAddressList=1')
+				.getOne();
+
+			// let user = await db.findOne({
+			// 	where: { id: Number(userId) },
+			// 	relations: ['shippingAddresses'] });
 			if (!user) {
 				return resp
 					.status(400)
@@ -63,7 +73,7 @@ class UserController {
 						)
 					);
 			}
-			user.password = '********';
+
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
 			logger.error('find a user failed', e);
@@ -72,85 +82,36 @@ class UserController {
 	}
 
 	static async login(req: Request, resp: Response) {
-		const { email, password } = req.body;
-		logger.info(`User ${email} trying to login.`);
-		const db = gDB.getRepository(User);
-		try {
-			let user = await db.findOneBy({ email: email });
-			if (!user) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, `User not exist.`));
-			}
-			let loginSuccess = await user.comparePassword(password);
-			if (!loginSuccess) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password Incorrect.`));
-			}
-
-			logger.info(`user ${email} login successfullym generating jwt token`);
-			const token = jwt.sign({ uid: user.id, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-				expiresIn: '2h',
-			});
-
-			return resp.status(200).send(
-				ResponseHelper.generateSuccessResult({
-					userId: user.id,
-					firstName: user.firstName,
-					email: user.email,
-					isAdmin: user.isAdmin,
-					token: token,
-				})
-			);
-		} catch (e) {
-			logger.error('find a user failed', e);
-			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		let result = await validateEmailPassword(req);
+		if (!(result instanceof User)) {
+			return resp.status(400).send(ResponseHelper.generateFailureResultWithError(result));
 		}
+
+		const user: User = result as User;
+		delete user.password;
+
+		logger.info(`user email=${user.email} login successfully generating jwt token`);
+		const token = generateJwt(user);
+
+		return resp.status(200).send(ResponseHelper.generateSuccessResult({ ...user, token: token }));
 	}
 
 	static async adminLogin(req: Request, resp: Response) {
-		const { email, password } = req.body;
-		logger.info(`User ${email} trying to login.`);
-		const db = gDB.getRepository(User);
-		try {
-			let user = await db.findOneBy({ email: email });
-			if (!user) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, `User not exist.`));
-			}
-			let loginSuccess = await user.comparePassword(password);
-			if (!loginSuccess) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.PASSWORD_INCORRECT, `Password Incorrect.`));
-			}
-
-			if (!user.isAdmin) {
-				return resp
-					.status(403)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, 'Not admin user.'));
-			}
-
-			logger.info(`user ${email} login successfullym generating jwt token`);
-			const token = jwt.sign({ uid: user.id, email: user.email, isAdmin: user.isAdmin }, process.env.JWT_SECRET, {
-				expiresIn: '2h',
-			});
-
-			return resp.status(200).send(
-				ResponseHelper.generateSuccessResult({
-					userId: user.id,
-					firstName: user.firstName,
-					email: user.email,
-					isAdmin: user.isAdmin,
-					token: token,
-				})
-			);
-		} catch (e) {
-			logger.error('find a user failed', e);
-			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		let result = await validateEmailPassword(req);
+		if (!(result instanceof User)) {
+			return resp.status(400).send(ResponseHelper.generateFailureResultWithError(result));
 		}
+
+		const user: User = result as User;
+		if (!user.isAdmin) {
+			return resp.status(403).send(ResponseHelper.generateFailureResult(ErrorCode.NOT_ADMIN, 'Not admin user.'));
+		}
+
+		delete user.password;
+		logger.info(`user email=${user.email} login successfully generating jwt token`);
+		const token = generateJwt(user);
+
+		return resp.status(200).send(ResponseHelper.generateSuccessResult({ ...user, token: token }));
 	}
 
 	static async resetPassword(req: Request, resp: Response) {
@@ -167,13 +128,9 @@ class UserController {
 			user.password = password;
 			await db.save(user);
 
+			delete user.password;
 			logger.info(`user ${email} password reset successfully`);
-			return resp.status(200).send(
-				ResponseHelper.generateSuccessResult({
-					email: user.email,
-					password: password.substring(0, 3) + '********',
-				})
-			);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
 			logger.error('reset password failed', e);
 			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
@@ -183,24 +140,12 @@ class UserController {
 	static async getAllShippingAddresses(req: Request, resp: Response) {}
 
 	static async addShippingAddress(req: Request, resp: Response) {
-		const { userId } = req.body;
-
-		if (userId && !Number.isInteger(Number(userId))) {
-			return resp
-				.status(400)
-				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
-		}
 		try {
-			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
-			if (!user) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
-			}
-
+			const user: User = req['loginUser'];
+			logger.debug(user);
 			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
 			shippingAddress.user = user;
-			shippingAddress.countryCode = 'CA';
+			// shippingAddress.countryCode = 'CA';
 			const errors = await validate(shippingAddress);
 			if (errors.length > 0) {
 				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
@@ -220,3 +165,41 @@ class UserController {
 }
 
 export default UserController;
+
+async function validateEmailPassword(req: Request): Promise<{ errorCode: ErrorCode; message: string } | User> {
+	const { email, password } = req.body;
+	logger.info(`Validating email=${email}, password=${password.substring(0, 3)}********`);
+	const db = gDB.getRepository(User);
+	try {
+		let user = await db.findOne({
+			where: { email: email },
+			select: ['id', 'firstName', 'lastName', 'email', 'password', 'isAdmin'],
+		});
+		if (!user) {
+			logger.error(`email=${email} not found`);
+			return {
+				errorCode: ErrorCode.USER_NOT_EXIST,
+				message: `User not exist.`,
+			};
+		}
+		let loginSuccess = await user.comparePassword(password);
+		if (!loginSuccess) {
+			logger.error(`email=${email} password incorrect`);
+			return {
+				errorCode: ErrorCode.PASSWORD_INCORRECT,
+				message: `Password Incorrect.`,
+			};
+		}
+		return user;
+	} catch (e) {
+		return {
+			errorCode: ErrorCode.DB_ERROR,
+			message: e.e.driverError,
+		};
+	}
+}
+
+function generateJwt(user: User): string {
+	const token = jwt.sign({ user: user }, process.env.JWT_SECRET, { expiresIn: '2h' });
+	return token;
+}

@@ -45,8 +45,8 @@ export const validateJwt = (req: Request, resp: Response, next: NextFunction) =>
 						)
 					);
 			}
-			const user = decoded;
-			req['user'] = decoded;
+			// const user = decoded;
+			req['loginUser'] = decoded['user'];
 			logger.info('Authorization token verified', decoded);
 			next();
 		});
@@ -115,7 +115,7 @@ export const validateAdminJwt = (req: Request, resp: Response, next: NextFunctio
 						)
 					);
 			}
-			req['user'] = decoded;
+			req['loginUser'] = decoded['user'];
 			logger.info('Authorization token verified', decoded);
 			next();
 		});
