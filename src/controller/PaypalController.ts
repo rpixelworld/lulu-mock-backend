@@ -47,7 +47,7 @@ class PaypalController {
 	static async createPaypalOrder(req: Request, resp: Response) {
 		const { orderId, totalCost } = req.body;
 		try {
-			const order: Order = await gDB.getRepository(Order).findOne({where: {id: orderId}})
+			const order: Order = await gDB.getRepository(Order).findOne({ where: { id: orderId } });
 
 			const accessToken = await PaypalController.generateAccessToken();
 			const url = `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`;
@@ -75,7 +75,7 @@ class PaypalController {
 					// "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
 				},
 				method: 'POST',
-					body: JSON.stringify(payload),
+				body: JSON.stringify(payload),
 			});
 
 			const { jsonResponse, httpStatusCode } = await PaypalController.handleResponse(response);
@@ -107,18 +107,17 @@ class PaypalController {
 
 			const { jsonResponse, httpStatusCode } = await PaypalController.handleResponse(response);
 
-			if(httpStatusCode=='201') {
+			if (httpStatusCode == '201') {
 				const referenceId = jsonResponse['purchase_units'][0].reference_id;
-				const orderId = Number(referenceId)
-				const order = await gDB.getRepository(Order).findOne({where: {id: orderId}});
-				order.status = OrderStatus.PAID
+				const orderId = Number(referenceId);
+				const order = await gDB.getRepository(Order).findOne({ where: { id: orderId } });
+				order.status = OrderStatus.PAID;
 				order.paymentMethod = PaymentMethod.PAYPAL;
-				order.paymentComment = paypalOrderId
-				await gDB.getRepository(Order).save(order)
+				order.paymentComment = paypalOrderId;
+				await gDB.getRepository(Order).save(order);
 			}
 
 			return resp.status(httpStatusCode).json(jsonResponse);
-
 		} catch (e) {
 			console.error('Failed to create order:', e);
 			return resp.status(500).json({ error: 'Failed to capture order.' });
