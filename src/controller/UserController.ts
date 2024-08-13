@@ -138,40 +138,30 @@ class UserController {
 	}
 
 	static async getAllShippingAddresses(req: Request, resp: Response) {
-		const { userId } = req.body;
-
-		if (!Number.isInteger(Number(userId))) {
-			return resp
-				.status(400)
-				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
-		}
-
 		try {
-			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
-			if (!user) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User does not exist'));
-			}
+			const user: User = req['loginUser'];
 
-			const shippingAddresses: ShippingAddress[] = await gDB.getRepository(ShippingAddress).find({
-				where: { id: userId },
+			// Retrieve all shipping addresses for the logged-in user
+			const addresses = await gDB.getRepository(ShippingAddress).find({
+				where: { user: user },
 			});
 
-			if (shippingAddresses.length === 0) {
+			if (addresses.length === 0) {
 				return resp
 					.status(404)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'No shipping addresses found'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'No addresses found'));
 			}
 
-			return resp.status(200).send(ResponseHelper.generateSuccessResult(shippingAddresses));
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(addresses));
 		} catch (e) {
-			logger.error('error retrieving shipping addresses', e);
+			logger.error('Error retrieving addresses', e);
 			return resp
 				.status(500)
 				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
 		}
 	}
+
+
 
 	static async addShippingAddress(req: Request, resp: Response) {
 		try {
@@ -196,41 +186,29 @@ class UserController {
 	}
 
 	static async deleteShippingAddress(req: Request, resp: Response) {
-		const { userId, id } = req.body;
-
-		if (!Number.isInteger(Number(userId)) || !Number.isInteger(Number(id))) {
-			return resp
-				.status(400)
-				.send(
-					ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id or address id')
-				);
-		}
-
 		try {
-			const user: User = await gDB.getRepository(User).findOne({ where: { id: userId } });
-			if (!user) {
+			const user: User = req['loginUser'];
+			const { addressId } = req.params;
+
+			if (!Number.isInteger(Number(addressId))) {
 				return resp
 					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User does not exist'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid address id'));
 			}
 
-			const shippingAddress: ShippingAddress = await gDB.getRepository(ShippingAddress).findOne({
-				where: {
-					id: id,
-					user: userId,
-				},
+			const address = await gDB.getRepository(ShippingAddress).findOne({
+				where: { id: Number(addressId), user: user },
 			});
-
-			if (!shippingAddress) {
+			if (!address) {
 				return resp
 					.status(404)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Shipping address not found'));
+					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Address not found'));
 			}
 
-			await gDB.getRepository(ShippingAddress).remove(shippingAddress);
-			return resp.status(200).send(ResponseHelper.generateSuccessResult('Shipping address deleted successfully'));
+			await gDB.getRepository(ShippingAddress).remove(address);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult('Address deleted successfully'));
 		} catch (e) {
-			logger.error('error deleting shipping address', e);
+			logger.error('Error deleting address', e);
 			return resp
 				.status(500)
 				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
