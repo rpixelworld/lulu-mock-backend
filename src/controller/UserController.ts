@@ -161,8 +161,6 @@ class UserController {
 		}
 	}
 
-
-
 	static async addShippingAddress(req: Request, resp: Response) {
 		try {
 			const user: User = req['loginUser'];
