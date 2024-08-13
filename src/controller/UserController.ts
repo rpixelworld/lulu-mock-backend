@@ -44,7 +44,7 @@ class UserController {
 
 	static async one(req: Request, resp: Response) {
 		const { userId } = req.params;
-		logger.info('find user with id=', userId, Number.isInteger(userId));
+		logger.info('find user with id=', userId, Number.isInteger(Number(userId)));
 		if (!Number.isInteger(Number(userId))) {
 			return resp
 				.status(400)
@@ -55,9 +55,9 @@ class UserController {
 		try {
 			let user = await db
 				.createQueryBuilder('user')
-				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress')
-				.where('id=:userId', { userId: Number(userId) })
-				.where('shippingAddress.inUsersAddressList=1')
+				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress', 'shippingAddress.inUsersAddressList=1')
+				.where('user.id=:userId', { userId: Number(userId) })
+				// .andWhere('shippingAddress.inUsersAddressList=1')
 				.getOne();
 
 			// let user = await db.findOne({
