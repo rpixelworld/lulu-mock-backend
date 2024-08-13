@@ -1,6 +1,10 @@
 import fetch from 'node-fetch';
 import { logger } from '../LoggerHelper';
 import { Request, Response } from 'express';
+import gDB from '../InitDataSource';
+import { Order } from '../entity/Order.entity';
+import { PaymentMethod } from '../common/PaymentMethod';
+import { OrderStatus } from '../common/OrderStatus';
 
 class PaypalController {
 	static async generateAccessToken() {
@@ -41,17 +45,21 @@ class PaypalController {
 	}
 
 	static async createPaypalOrder(req: Request, resp: Response) {
-		const { totalCost } = req.body;
+		const { orderId, totalCost } = req.body;
 		try {
+			const order: Order = await gDB.getRepository(Order).findOne({where: {id: orderId}})
+
 			const accessToken = await PaypalController.generateAccessToken();
 			const url = `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`;
 			const payload = {
 				intent: 'CAPTURE',
 				purchase_units: [
 					{
+						reference_id: String(order.id).padStart(10, '0'),
+						description: `${order.totalItem} ITEMS FROM LULULEMON`,
 						amount: {
 							currency_code: 'CAD',
-							value: totalCost,
+							value: order.orderTotalAmount,
 						},
 					},
 				],
@@ -67,7 +75,7 @@ class PaypalController {
 					// "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
 				},
 				method: 'POST',
-				body: JSON.stringify(payload),
+					body: JSON.stringify(payload),
 			});
 
 			const { jsonResponse, httpStatusCode } = await PaypalController.handleResponse(response);
@@ -98,7 +106,19 @@ class PaypalController {
 			});
 
 			const { jsonResponse, httpStatusCode } = await PaypalController.handleResponse(response);
+
+			if(httpStatusCode=='201') {
+				const referenceId = jsonResponse['purchase_units'][0].reference_id;
+				const orderId = Number(referenceId)
+				const order = await gDB.getRepository(Order).findOne({where: {id: orderId}});
+				order.status = OrderStatus.PAID
+				order.paymentMethod = PaymentMethod.PAYPAL;
+				order.paymentComment = paypalOrderId
+				await gDB.getRepository(Order).save(order)
+			}
+
 			return resp.status(httpStatusCode).json(jsonResponse);
+
 		} catch (e) {
 			console.error('Failed to create order:', e);
 			return resp.status(500).json({ error: 'Failed to capture order.' });
