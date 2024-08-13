@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
 import { Order } from '../entity/Order.entity';
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import ResponseHelper from './ResponseHelper';
 import { ErrorCode } from '../common/ErrorCode';
 
@@ -96,10 +96,10 @@ export class ReceiptController {
 				size: 17,
 			});
 
-			let currentItemY = 570;
+			let currentItemY = 590;
 			order.orderItems.forEach((item, index) => {
 				// Update Y position for each item
-				currentItemY -= 30;
+				currentItemY -= 60;
 
 				page.drawText(`Item ${index + 1}: ${item.productName}`, {
 					x: 50,
@@ -109,68 +109,67 @@ export class ReceiptController {
 				});
 
 				page.drawText(`Quantity: ${item.quantity}`, {
-					x: 230,
-					y: currentItemY,
+					x: 50,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
 
 				page.drawText(`Price: $${item.price.toFixed(2)}`, {
-					x: 330,
-					y: currentItemY,
+					x: 180,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
 
 				page.drawText(`Subtotal: $${(item.price * item.quantity).toFixed(2)}`, {
-					x: 450,
-					y: currentItemY,
+					x: 350,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
 			});
 
 			// Add totals and payment details
-			page.drawText(`Total Amount:`, {
-				x: 300,
-				y: 300,
+			const summaryY = currentItemY - 80;
+			page.drawText(`Summary:`, {
+				x: 50,
+				y: summaryY,
 				font,
-				size: 14,
+				size: 17,
 			});
-			page.drawText(`$${order.totalAmount.toFixed(2)}`, {
-				x: 390,
-				y: 300,
+			page.drawText(`Delivery Fee: $${order.deliveryFee.toFixed(2)}`, {
+				x: 50,
+				y: summaryY - 30,
 				font,
-				size: 14,
-				color: rgb(0, 0, 1),
+				size: 15,
 			});
-
-			page.drawText(`Tax Amount:`, {
-				x: 450,
-				y: 300,
+			page.drawText(`Tax: $${order.tax.toFixed(2)}`, {
+				x: 250,
+				y: summaryY - 30,
 				font,
-				size: 14,
-			});
-			page.drawText(`$${order.tax.toFixed(2)}`, {
-				x: 530,
-				y: 300,
-				font,
-				size: 14,
-				color: rgb(0, 0, 1),
+				size: 15,
 			});
 
-			page.drawText(`Payment Method:`, {
-				x: 300,
-				y: 280,
+			page.drawText(` Total Amount: $${order.orderTotalAmount.toFixed(2)}`, {
+				x: 400,
+				y: summaryY - 30,
 				font,
-				size: 14,
+				size: 15,
 			});
-			page.drawText(`${order.paymentMethod}`, {
-				x: 410,
-				y: 280,
+
+			page.drawText(`Payment Method: ${order.paymentMethod}`, {
+				x: 50,
+				y: summaryY - 60,
 				font,
-				size: 14,
-				color: rgb(0, 0, 1),
+				size: 15,
+			});
+
+			page.drawText(`Payment comment: (${order.paymentComment})`, {
+				x: 250,
+				y: summaryY - 60,
+				font,
+				size: 15,
 			});
 
 			// Finalize and send the PDF

@@ -75,82 +75,70 @@ export class InvoiceController {
 				size: 15,
 			});
 			page.drawText(`${city}, ${province} ${postalCode}`, {
-				x: 350,
+				x: 400,
 				y: 610,
 				font,
 				size: 15,
 			});
-
-			// Add totals and payment details
-			page.drawText(`Total Amount:`, {
+			page.drawText(`Delivery Fee: $${order.deliveryFee.toFixed(2)}`, {
 				x: 50,
 				y: 580,
 				font,
 				size: 15,
 			});
-			page.drawText(`$${order.totalAmount.toFixed(2)}`, {
-				x: 150,
-				y: 580,
-				font,
-				size: 15,
-				color: rgb(0, 0, 0.545),
-			});
-
-			page.drawText(`Tax Amount:`, {
+			page.drawText(`Tax: $${order.tax.toFixed(2)}`, {
 				x: 50,
 				y: 550,
 				font,
 				size: 15,
 			});
-			page.drawText(`$${order.tax.toFixed(2)}`, {
-				x: 150,
-				y: 550,
+
+			page.drawText(`Total Amount: $${order.orderTotalAmount.toFixed(2)}`, {
+				x: 50,
+				y: 520,
 				font,
 				size: 15,
-				color: rgb(0, 0, 0.545),
 			});
 
 			// Loop through order items
 			page.drawText(`Items details:`, {
 				x: 50,
-				y: 500,
+				y: 460,
 				font,
-				size: 17,
+				size: 18,
 			});
-			let currentItemY = 500;
-			order.orderItems.forEach((item, index) => {
-				// Update Y position for each item
-				currentItemY -= 30;
 
+			let currentItemY = 480;
+			order.orderItems.forEach((item, index) => {
+				currentItemY -= 60;
 				page.drawText(`Item ${index + 1}: ${item.productName}`, {
 					x: 50,
 					y: currentItemY,
 					font,
-					size: 13,
+					size: 15,
 				});
 
 				page.drawText(`Quantity: ${item.quantity}`, {
-					x: 230,
-					y: currentItemY,
+					x: 50,
+					y: currentItemY - 30,
 					font,
-					size: 13,
+					size: 15,
 				});
 
 				page.drawText(`Price: $${item.price.toFixed(2)}`, {
-					x: 330,
-					y: currentItemY,
+					x: 180,
+					y: currentItemY - 30,
 					font,
-					size: 13,
+					size: 15,
 				});
 
 				page.drawText(`Subtotal: $${(item.price * item.quantity).toFixed(2)}`, {
-					x: 450,
-					y: currentItemY,
+					x: 350,
+					y: currentItemY - 30,
 					font,
-					size: 13,
+					size: 15,
 				});
 			});
-
 			// Finalize and send the PDF
 			const pdfBytes = await pdfDoc.save();
 
