@@ -137,7 +137,29 @@ class UserController {
 		}
 	}
 
-	static async getAllShippingAddresses(req: Request, resp: Response) {}
+	static async getAllShippingAddresses(req: Request, resp: Response) {
+		try {
+			const user: User = req['loginUser'];
+
+			// Retrieve all shipping addresses for the logged-in user
+			const addresses = await gDB.getRepository(ShippingAddress).find({
+				where: { user: user },
+			});
+
+			if (addresses.length === 0) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'No addresses found'));
+			}
+
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(addresses));
+		} catch (e) {
+			logger.error('Error retrieving addresses', e);
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
+		}
+	}
 
 	static async addShippingAddress(req: Request, resp: Response) {
 		try {
@@ -161,7 +183,35 @@ class UserController {
 		}
 	}
 
-	static async deleteShippingAddress(req: Request, resp: Response) {}
+	static async deleteShippingAddress(req: Request, resp: Response) {
+		try {
+			const user: User = req['loginUser'];
+			const { addressId } = req.params;
+
+			if (!Number.isInteger(Number(addressId))) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid address id'));
+			}
+
+			const address = await gDB.getRepository(ShippingAddress).findOne({
+				where: { id: Number(addressId), user: user },
+			});
+			if (!address) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Address not found'));
+			}
+
+			await gDB.getRepository(ShippingAddress).remove(address);
+			return resp.status(200).send(ResponseHelper.generateSuccessResult('Address deleted successfully'));
+		} catch (e) {
+			logger.error('Error deleting address', e);
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
+		}
+	}
 }
 
 export default UserController;
