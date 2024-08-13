@@ -124,41 +124,46 @@ class OrderController {
 		}
 
 		const queryRunner = gDB.createQueryRunner();
-		try{
+		try {
 			await queryRunner.connect();
 			await queryRunner.startTransaction();
-			for (let i=0; i<order.orderItems.length; i++) {
+			for (let i = 0; i < order.orderItems.length; i++) {
 				let inventory = await queryRunner.manager.findOne(Inventory, {
 					where: {
 						productId: order.orderItems[i].productId,
 						colorId: order.orderItems[i].colorId,
-						size: order.orderItems[i].size
-					}
-				})
-				if(inventory.stock>=order.orderItems[i].quantity) {
+						size: order.orderItems[i].size,
+					},
+				});
+				if (inventory.stock >= order.orderItems[i].quantity) {
 					inventory.stock = inventory.stock - order.orderItems[i].quantity;
 					await queryRunner.manager.save(inventory);
-				}
-				else {
-					throw new Error(ErrorCode.STOCK_CHANGE_UNAVILABLE)
+				} else {
+					throw new Error(ErrorCode.STOCK_CHANGE_UNAVILABLE);
 				}
 			}
 			await queryRunner.manager.save(order);
-			await queryRunner.commitTransaction()
-			logger.info(`order created with id = ${order.id}`)
+			await queryRunner.commitTransaction();
+			logger.info(`order created with id = ${order.id}`);
 
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
 		} catch (error) {
 			logger.error('error place order, rollback', error);
-			await queryRunner.rollbackTransaction()
-			if(error.message == ErrorCode.STOCK_CHANGE_UNAVILABLE) {
-				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.STOCK_CHANGE_UNAVILABLE, 'Stock changed, one or more items in the cart is now unavailable, please review your cart again.'))
+			await queryRunner.rollbackTransaction();
+			if (error.message == ErrorCode.STOCK_CHANGE_UNAVILABLE) {
+				return resp
+					.status(400)
+					.send(
+						ResponseHelper.generateFailureResult(
+							ErrorCode.STOCK_CHANGE_UNAVILABLE,
+							'Stock changed, one or more items in the cart is now unavailable, please review your cart again.'
+						)
+					);
 			}
 			return resp
 				.status(500)
 				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'internal server error'));
-		}
-		finally {
+		} finally {
 			await queryRunner.release();
 			logger.info(`connection releaed`);
 		}
