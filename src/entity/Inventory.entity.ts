@@ -2,17 +2,10 @@ import {
 	Column,
 	CreateDateColumn,
 	Entity,
-	ManyToOne,
-	OneToOne,
 	PrimaryGeneratedColumn,
 	Unique,
 	UpdateDateColumn,
 } from 'typeorm';
-import { ShippingAddress } from './ShippingAddress.entity';
-import { DeliveryOption } from '../common/DeliveryOption';
-import { Province } from '../common/Province';
-import { IsEnum } from 'class-validator';
-import { Order } from './Order.entity';
 
 @Entity({ name: 'TBL_INVENTORY' })
 @Unique(['productId', 'colorId', 'size'])

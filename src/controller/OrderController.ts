@@ -10,6 +10,7 @@ import { User } from '../entity/User.entity';
 import { ShippingAddress } from '../entity/ShippingAddress.entity';
 import { OrderStatus } from '../common/OrderStatus';
 import { TaxMaster } from '../entity/TaxMaster.entity';
+import { Inventory } from '../entity/Inventory.entity';
 
 class OrderController {
 	static async getUserOrders(req: Request, resp: Response) {
@@ -76,6 +77,7 @@ class OrderController {
 
 	static async placeOrder(req: Request, resp: Response) {
 		logger.info('placing order');
+		let order: Order;
 		try {
 			const { isNewShippingAddress, shippingAddress } = req.body;
 
@@ -86,7 +88,7 @@ class OrderController {
 					.send(ResponseHelper.generateFailureResult(ErrorCode.USER_NOT_EXIST, 'User not exist'));
 			}
 
-			let order: Order = Object.assign(new Order(), req.body);
+			order = Object.assign(new Order(), req.body);
 			logger.debug(order);
 			order.user = user;
 
@@ -99,33 +101,7 @@ class OrderController {
 				await gDB.getRepository(ShippingAddress).save(shippingAddress);
 				order.shippingAddress = shippingAddress;
 			}
-			// else {
-			// 	if (shippingAddress.id && !Number.isInteger(Number(shippingAddress.id))) {
-			// 		return resp
-			// 			.status(400)
-			// 			.send(
-			// 				ResponseHelper.generateFailureResult(
-			// 					ErrorCode.VALIDATION_ERROR,
-			// 					'Invalid shippingAddress id'
-			// 				)
-			// 			);
-			// 	}
 
-			// const existingShippingAddress = await gDB
-			// 	.getRepository(ShippingAddress)
-			// 	.findOne({ where: { id: shippingAddress.id } });
-			// if (!existingShippingAddress) {
-			// 	return resp
-			// 		.status(400)
-			// 		.send(
-			// 			ResponseHelper.generateFailureResult(
-			// 				ErrorCode.ADDRESS_NOT_EXIST,
-			// 				'Shipping address not exist'
-			// 			)
-			// 		);
-			// }
-			// order.shippingAddress = existingShippingAddress;
-			// }
 			const province = shippingAddress.province;
 			const taxRate = await gDB.getRepository(TaxMaster).findOne({ where: { province: province } });
 			const totalRate =
@@ -140,15 +116,51 @@ class OrderController {
 			}
 
 			order.status = OrderStatus.CREATED;
-
-			await gDB.getRepository(Order).save(order);
-
-			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
 		} catch (error) {
 			logger.error('error place order', error);
 			return resp
 				.status(500)
 				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'internal server error'));
+		}
+
+		const queryRunner = gDB.createQueryRunner();
+		try{
+			await queryRunner.connect();
+			await queryRunner.startTransaction();
+			for (let i=0; i<order.orderItems.length; i++) {
+				let inventory = await queryRunner.manager.findOne(Inventory, {
+					where: {
+						productId: order.orderItems[i].productId,
+						colorId: order.orderItems[i].colorId,
+						size: order.orderItems[i].size
+					}
+				})
+				if(inventory.stock>=order.orderItems[i].quantity) {
+					inventory.stock = inventory.stock - order.orderItems[i].quantity;
+					await queryRunner.manager.save(inventory);
+				}
+				else {
+					throw new Error(ErrorCode.STOCK_CHANGE_UNAVILABLE)
+				}
+			}
+			await queryRunner.manager.save(order);
+			await queryRunner.commitTransaction()
+			logger.info(`order created with id = ${order.id}`)
+
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(order));
+		} catch (error) {
+			logger.error('error place order, rollback', error);
+			await queryRunner.rollbackTransaction()
+			if(error.message == ErrorCode.STOCK_CHANGE_UNAVILABLE) {
+				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.STOCK_CHANGE_UNAVILABLE, 'Stock changed, one or more items in the cart is now unavailable, please review your cart again.'))
+			}
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'internal server error'));
+		}
+		finally {
+			await queryRunner.release();
+			logger.info(`connection releaed`);
 		}
 	}
 
