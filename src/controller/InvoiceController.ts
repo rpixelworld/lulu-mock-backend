@@ -123,18 +123,18 @@ export class InvoiceController {
 					y: currentItemY - 30,
 					font,
 					size: 15,
-				})
+				});
 
 				page.drawText(`Price: $${item.price.toFixed(2)}`, {
 					x: 180,
-					y: currentItemY -30,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
 
 				page.drawText(`Subtotal: $${(item.price * item.quantity).toFixed(2)}`, {
 					x: 350,
-					y: currentItemY -30,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});

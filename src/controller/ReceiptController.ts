@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
 import { Order } from '../entity/Order.entity';
-import { PDFDocument, StandardFonts} from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import ResponseHelper from './ResponseHelper';
 import { ErrorCode } from '../common/ErrorCode';
 
@@ -113,18 +113,18 @@ export class ReceiptController {
 					y: currentItemY - 30,
 					font,
 					size: 15,
-				})
+				});
 
 				page.drawText(`Price: $${item.price.toFixed(2)}`, {
 					x: 180,
-					y: currentItemY -30,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
 
 				page.drawText(`Subtotal: $${(item.price * item.quantity).toFixed(2)}`, {
 					x: 350,
-					y: currentItemY -30,
+					y: currentItemY - 30,
 					font,
 					size: 15,
 				});
@@ -140,34 +140,34 @@ export class ReceiptController {
 			});
 			page.drawText(`Delivery Fee: $${order.deliveryFee.toFixed(2)}`, {
 				x: 50,
-				y: summaryY -30,
+				y: summaryY - 30,
 				font,
 				size: 15,
 			});
 			page.drawText(`Tax: $${order.tax.toFixed(2)}`, {
 				x: 250,
-				y:summaryY -30,
+				y: summaryY - 30,
 				font,
 				size: 15,
 			});
 
 			page.drawText(` Total Amount: $${order.orderTotalAmount.toFixed(2)}`, {
 				x: 400,
-				y:summaryY -30,
+				y: summaryY - 30,
 				font,
 				size: 15,
 			});
 
 			page.drawText(`Payment Method: ${order.paymentMethod}`, {
 				x: 50,
-				y: summaryY -60,
+				y: summaryY - 60,
 				font,
 				size: 15,
 			});
 
 			page.drawText(`Payment comment: (${order.paymentComment})`, {
 				x: 250,
-				y: summaryY -60,
+				y: summaryY - 60,
 				font,
 				size: 15,
 			});
