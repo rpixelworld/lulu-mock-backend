@@ -55,7 +55,7 @@ class UserController {
 		try {
 			let user = await db
 				.createQueryBuilder('user')
-				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress', 'shippingAddress.inUsersAddressList=1')
+				.leftJoinAndSelect('user.shippingAddresses', 'shippingAddress', 'shippingAddress.inUsersAddressList=1 and shippingAddress.isDeleted=0')
 				.where('user.id=:userId', { userId: Number(userId) })
 				// .andWhere('shippingAddress.inUsersAddressList=1')
 				.getOne();
@@ -202,8 +202,9 @@ class UserController {
 					.status(404)
 					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Address not found'));
 			}
+			address.isDeleted = true
+			await gDB.getRepository(ShippingAddress).save(address);
 
-			await gDB.getRepository(ShippingAddress).remove(address);
 			return resp.status(200).send(ResponseHelper.generateSuccessResult('Address deleted successfully'));
 		} catch (e) {
 			logger.error('Error deleting address', e);

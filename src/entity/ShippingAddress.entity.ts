@@ -72,6 +72,9 @@ export class ShippingAddress {
 	@OneToMany(() => Order, order => order.shippingAddress)
 	orders: Order[];
 
+	@Column({default:false})
+	isDeleted: boolean
+
 	@Column()
 	@CreateDateColumn()
 	createdAt: Date;

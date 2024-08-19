@@ -289,7 +289,7 @@ function createQueryBuilder(repo: Repository<Order>, req: Request): SelectQueryB
 	let queryBuilder: SelectQueryBuilder<Order> = repo.createQueryBuilder('order');
 
 	const user: User = req['loginUser'];
-	const { email, orderNumber, orderStatus } = req.body;
+	const { email, orderNumber, orderStatus, timeRange } = req.body;
 	if (user.id || email) {
 		queryBuilder.innerJoin('order.user', 'user');
 		if (email) {
@@ -298,12 +298,44 @@ function createQueryBuilder(repo: Repository<Order>, req: Request): SelectQueryB
 			queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
 		}
 	}
-	if (orderNumber) {
-		queryBuilder.where('id=:orderId', { orderId: Number(orderNumber) });
+	if (orderNumber && orderNumber!='') {
+		queryBuilder.andWhere('order.id=:orderId', { orderId: Number(orderNumber) });
 	}
-	if (orderStatus) {
-		queryBuilder.where('status=:orderStatus', { orderStatus: Number(orderStatus) });
+	if (orderStatus && orderStatus!='0') {
+		queryBuilder.andWhere('status=:orderStatus', { orderStatus: Number(orderStatus) });
 	}
+	if(timeRange && timeRange!=='ALL'){
+		let start = new Date(new Date().setHours(0,0,0,0))
+		let end = new Date(new Date().setHours(23,59,59,999))
+
+		switch (timeRange) {
+			case 'PAST_1_MONTH':
+				start.setMonth(start.getMonth()-1)
+				break
+			case 'PAST_3_MONTHs':
+				start.setMonth(start.getMonth()-3)
+				break
+			case 'PAST_6_MONTHs':
+				start.setMonth(start.getMonth()-6)
+				break
+			case 'YEAR_2024':
+				start.setMonth(1,1)
+				break
+			case 'BEFORE_YEAR_2024':
+				start.setFullYear(1970, 1, 1)
+				end.setFullYear(2023, 12, 31)
+				break
+			default:
+				break
+		}
+		queryBuilder.andWhere('order.createdAt between :start and :end', {
+			start: start, end: end
+		})
+	}
+
+
+	queryBuilder.innerJoinAndSelect('order.shippingAddress', 'shippingAddress')
+	queryBuilder.leftJoinAndSelect('order.orderItems', 'item')
 
 	const { pageNo = '1', pageSize = '5' } = req.query;
 	queryBuilder.skip((Number(pageNo) - 1) * Number(pageSize));
