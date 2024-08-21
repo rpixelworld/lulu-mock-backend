@@ -24,7 +24,8 @@ class OrderController {
 		const repo = gDB.getRepository(Order);
 		try {
 			const { pageNo = '1', pageSize = '5' } = req.query;
-			const queryBuilder: SelectQueryBuilder<Order> = createQueryBuilder(repo, req);
+			const user: User = req['loginUser'];
+			const queryBuilder: SelectQueryBuilder<Order> = createQueryBuilder(user, repo, req);
 			const [orders, total] = await queryBuilder.getManyAndCount();
 
 			return resp.status(200).send(
@@ -55,7 +56,7 @@ class OrderController {
 		const repo = gDB.getRepository(Order);
 		try {
 			const { pageNo = '1', pageSize = '5' } = req.query;
-			const queryBuilder: SelectQueryBuilder<Order> = createQueryBuilder(repo, req);
+			const queryBuilder: SelectQueryBuilder<Order> = createQueryBuilder(null, repo, req);
 			const [orders, total] = await queryBuilder.getManyAndCount();
 
 			return resp.status(200).send(
@@ -283,19 +284,20 @@ function validateQueryOrder(req: Request): string {
 	}
 }
 
-function createQueryBuilder(repo: Repository<Order>, req: Request): SelectQueryBuilder<Order> {
+function createQueryBuilder(user: User, repo: Repository<Order>, req: Request): SelectQueryBuilder<Order> {
 	let queryBuilder: SelectQueryBuilder<Order> = repo.createQueryBuilder('order');
-
-	const user: User = req['loginUser'];
 	const { email, orderNumber, orderStatus, timeRange } = req.body;
-	if (user.id || email) {
+	if(user) {
 		queryBuilder.innerJoin('order.user', 'user');
+		queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
+	}
+	else {
 		if (email) {
 			queryBuilder.where('user.email=:email', { email: email });
-		} else {
-			queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
 		}
 	}
+
+
 	if (orderNumber && orderNumber != '') {
 		queryBuilder.andWhere('order.id=:orderId', { orderId: Number(orderNumber) });
 	}
