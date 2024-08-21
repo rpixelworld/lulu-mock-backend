@@ -287,16 +287,14 @@ function validateQueryOrder(req: Request): string {
 function createQueryBuilder(user: User, repo: Repository<Order>, req: Request): SelectQueryBuilder<Order> {
 	let queryBuilder: SelectQueryBuilder<Order> = repo.createQueryBuilder('order');
 	const { email, orderNumber, orderStatus, timeRange } = req.body;
-	if(user) {
+	if (user) {
 		queryBuilder.innerJoin('order.user', 'user');
 		queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
-	}
-	else {
+	} else {
 		if (email) {
 			queryBuilder.where('user.email=:email', { email: email });
 		}
 	}
-
 
 	if (orderNumber && orderNumber != '') {
 		queryBuilder.andWhere('order.id=:orderId', { orderId: Number(orderNumber) });
