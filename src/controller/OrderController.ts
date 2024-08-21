@@ -291,7 +291,8 @@ function createQueryBuilder(user: User, repo: Repository<Order>, req: Request): 
 		queryBuilder.innerJoin('order.user', 'user');
 		queryBuilder.where('user.id=:userId', { userId: Number(user.id) });
 	} else {
-		if (email) {
+		if (email && email.trim()!='') {
+			queryBuilder.innerJoin('order.user', 'user');
 			queryBuilder.where('user.email=:email', { email: email });
 		}
 	}
