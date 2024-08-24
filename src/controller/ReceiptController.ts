@@ -180,7 +180,7 @@ export class ReceiptController {
 			res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
 			res.setHeader('Pragma', 'no-cache');
 			res.setHeader('Expires', '0');
-			return res.end(pdfBytes);
+			return res.send(Buffer.from(pdfBytes));
 		} catch (error) {
 			res.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, error.driverError));
 		}
