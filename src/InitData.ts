@@ -6,6 +6,7 @@ import './products.json';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { Inventory } from './entity/Inventory.entity';
+import { Product } from './entity/Product.entity';
 
 const provinceTaxes = [
 	new TaxMaster(Province.AB, 5, null, null),
@@ -110,10 +111,71 @@ function loadProductsfromJson(): any[] {
 	return jsonData.products;
 }
 
+export const  initProduct = async ()=> {
+	const products: any[] = loadProductsfromJson();
+
+	let productIdsArr: string[] = new Array();
+
+	for (let i = 0; i < products.length; i++) {
+		let product: any = products[i];
+		let productId: string = product.productId;
+		if (productIdsArr.includes(productId)) {
+			logger.info(`${productId} is a duplicate product, skip`);
+			continue;
+		}
+		if (!product.name || product.name.trim()==''){
+			logger.info(`${productId} empty product name, skip`);
+		}
+		productIdsArr.push(productId);
+
+		let productArr: Product[] = new Array();
+		for(let j=0; j<product.images.length; j++) {
+			let prodEntity = new Product(product.productId, product.images[j].colorId)
+			prodEntity.productName = product.name
+			prodEntity.colorAlt = product.images[j].colorAlt;
+			prodEntity.fullnameWithColor = product.images[j].mainCarousel.alt;
+			prodEntity.imageUrls = product.images[j].mainCarousel.media
+
+			productArr.push(prodEntity);
+		}
+		await saveProduct(productArr).then(() => {
+			logger.info(`initializing products ${productArr.length} records inserted`);
+		});
+
+		productArr = new Array()
+
+
+	}
+	logger.info(`initializing ${productIdsArr.length} products completed`);
+}
+
+const saveProduct = async (productArr: Product[]) => {
+	const queryRunner = gDB.createQueryRunner();
+	await queryRunner.connect();
+	await queryRunner.startTransaction();
+	logger.info('db connection created and transaction started');
+	try {
+		logger.info(`saving ${productArr.length} records to inventory`);
+		for (let i = 0; i < productArr.length; i++) {
+			await queryRunner.manager.save(productArr[i]);
+		}
+
+		await queryRunner.commitTransaction();
+		logger.info(`transaction committed`);
+	} catch (e) {
+		logger.error(`Exception saving product, rollback`, e);
+		await queryRunner.rollbackTransaction();
+	} finally {
+		await queryRunner.release();
+		logger.info(`connection releaed`);
+	}
+};
+
 async function execute() {
 	await gDB.initialize();
 	// await initTaxMaster();
-	await initInventory();
+	// await initInventory();
+	await initProduct();
 }
 
 execute().then(() => {

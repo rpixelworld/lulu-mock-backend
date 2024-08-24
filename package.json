@@ -17,6 +17,10 @@
     "typescript-eslint": "^8.0.0"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.12.1",
+    "@google-cloud/vision": "^4.3.2",
+    "@types/multer": "^1.4.12",
+    "axios": "^1.7.4",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "class-validator": "^0.13.1",
@@ -30,8 +34,8 @@
     "jsonwebtoken": "^9.0.2",
     "log4js": "^6.9.1",
     "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.11.0",
-    "node-fetch": "2",
     "pdf-lib": "^1.17.1",
     "reflect-metadata": "^0.2.2",
     "stack-trace": "^1.0.0-pre2",
@@ -47,6 +51,8 @@
     "dev:schema:drop": "cross-env NODE_ENV=development ts-node ./node_modules/typeorm/cli.js schema:drop -d src/InitDataSource.ts",
     "prepare": "husky",
     "---Data initilization---": "",
-    "dev:data:init": "cross-env NODE_ENV=development  ts-node-dev --respawn --transpile-only ./src/InitData.ts"
+    "dev:data:init": "cross-env NODE_ENV=development  ts-node-dev --respawn --transpile-only ./src/InitData.ts",
+    "---Google Vision initialization---": "",
+    "dev:googlevision-init": "cross-env NODE_ENV=development  ts-node-dev --respawn --transpile-only ./src/InitGoogleVision.ts"
   }
 }

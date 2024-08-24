@@ -21,6 +21,9 @@ const startServer = async () => {
 		app.use(cors());
 		app.use(rootRouter);
 
+		// Serve static files from the 'uploads' directory
+		app.use('../uploads/', express.static('uploads'));
+
 		// setup express app here
 		// ...
 
@@ -35,4 +38,5 @@ const startServer = async () => {
 	}
 };
 
+console.log(process.env.PORT)
 startServer();
