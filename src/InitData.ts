@@ -111,7 +111,7 @@ function loadProductsfromJson(): any[] {
 	return jsonData.products;
 }
 
-export const  initProduct = async ()=> {
+export const initProduct = async () => {
 	const products: any[] = loadProductsfromJson();
 
 	let productIdsArr: string[] = new Array();
@@ -123,18 +123,18 @@ export const  initProduct = async ()=> {
 			logger.info(`${productId} is a duplicate product, skip`);
 			continue;
 		}
-		if (!product.name || product.name.trim()==''){
+		if (!product.name || product.name.trim() == '') {
 			logger.info(`${productId} empty product name, skip`);
 		}
 		productIdsArr.push(productId);
 
 		let productArr: Product[] = new Array();
-		for(let j=0; j<product.images.length; j++) {
-			let prodEntity = new Product(product.productId, product.images[j].colorId)
-			prodEntity.productName = product.name
+		for (let j = 0; j < product.images.length; j++) {
+			let prodEntity = new Product(product.productId, product.images[j].colorId);
+			prodEntity.productName = product.name;
 			prodEntity.colorAlt = product.images[j].colorAlt;
 			prodEntity.fullnameWithColor = product.images[j].mainCarousel.alt;
-			prodEntity.imageUrls = product.images[j].mainCarousel.media
+			prodEntity.imageUrls = product.images[j].mainCarousel.media;
 
 			productArr.push(prodEntity);
 		}
@@ -142,12 +142,10 @@ export const  initProduct = async ()=> {
 			logger.info(`initializing products ${productArr.length} records inserted`);
 		});
 
-		productArr = new Array()
-
-
+		productArr = new Array();
 	}
 	logger.info(`initializing ${productIdsArr.length} products completed`);
-}
+};
 
 const saveProduct = async (productArr: Product[]) => {
 	const queryRunner = gDB.createQueryRunner();

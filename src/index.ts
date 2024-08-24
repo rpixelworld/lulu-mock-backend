@@ -38,5 +38,5 @@ const startServer = async () => {
 	}
 };
 
-console.log(process.env.PORT)
+console.log(process.env.PORT);
 startServer();

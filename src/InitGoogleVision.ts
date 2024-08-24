@@ -26,7 +26,6 @@ const productSetDisplayName = 'LuLu Product Set';
 const locationPath = client.locationPath(projectId, location);
 
 async function createProductSet() {
-
 	const productSet = {
 		displayName: productSetDisplayName,
 	};
@@ -37,20 +36,19 @@ async function createProductSet() {
 		productSetId: productSetId,
 	};
 
-	const [createdProductSet] = await client.createProductSet(request)
+	const [createdProductSet] = await client.createProductSet(request);
 	logger.log(`Product Set name: ${createdProductSet.name}`);
 }
 
-async function getProductsFromDB() : Promise<Product[]> {
+async function getProductsFromDB(): Promise<Product[]> {
 	await gDB.initialize();
-	return await gDB.getRepository(Product).find({})
+	return await gDB.getRepository(Product).find({});
 }
-
 
 async function createProduct(productFromDB: Product): Promise<IProduct> {
 	const product = {
 		displayName: productFromDB.fullnameWithColor,
-		productCategory: 'apparel'
+		productCategory: 'apparel',
 	};
 
 	const request = {
@@ -64,13 +62,9 @@ async function createProduct(productFromDB: Product): Promise<IProduct> {
 	return createdProduct;
 }
 
-async function addProductToSet(productFromDB: Product) :Promise<IEmpty> {
+async function addProductToSet(productFromDB: Product): Promise<IEmpty> {
 	const productPath = client.productPath(projectId, location, productFromDB.productId + '__' + productFromDB.colorId);
-	const productSetPath = client.productSetPath(
-		projectId,
-		location,
-		productSetId
-	);
+	const productSetPath = client.productSetPath(projectId, location, productSetId);
 	const addToSetRequest = {
 		name: productSetPath,
 		product: productPath,
@@ -79,9 +73,13 @@ async function addProductToSet(productFromDB: Product) :Promise<IEmpty> {
 	return await client.addProductToProductSet(addToSetRequest);
 }
 
-async function createProductImageReference(productFromDB: Product, imageUrl: string):Promise<IReferenceImage>  {
-	const filename = imageUrl.substring(imageUrl.lastIndexOf('/')+1, imageUrl.length);
-	const formattedParent = client.productPath(projectId, location, productFromDB.productId + '__' + productFromDB.colorId);
+async function createProductImageReference(productFromDB: Product, imageUrl: string): Promise<IReferenceImage> {
+	const filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1, imageUrl.length);
+	const formattedParent = client.productPath(
+		projectId,
+		location,
+		productFromDB.productId + '__' + productFromDB.colorId
+	);
 	const referenceImage = {
 		uri: `gs://lulu-product-images/${productFromDB.productId}/${productFromDB.colorId}/${filename}`,
 	};
@@ -98,8 +96,8 @@ async function createProductImageReference(productFromDB: Product, imageUrl: str
 //gs://lulu-product-images/prod10080329/0001/prod10080329_0001_img0.jpg
 async function createProductIncludingAddToSetAndAddReferenceImage() {
 	const productsFromDB = await getProductsFromDB();
-	for(let i = 0; i < productsFromDB.length; i++) {
-		if(i<668) {
+	for (let i = 0; i < productsFromDB.length; i++) {
+		if (i < 668) {
 			continue;
 		}
 		const createdProduct = await createProduct(productsFromDB[i]);
@@ -108,10 +106,10 @@ async function createProductIncludingAddToSetAndAddReferenceImage() {
 		await addProductToSet(productsFromDB[i]);
 		logger.log(`${i}. Product ${createdProduct.name} added to product set.`);
 
-		const images = productsFromDB[i].imageUrls.split(' | ')
-		for(let j=0; j<images.length; j++) {
-			const refImg: IReferenceImage = await createProductImageReference(productsFromDB[i], images[j])
-			logger.log(`${i}.${j}-reference image created. ${refImg.uri}`)
+		const images = productsFromDB[i].imageUrls.split(' | ');
+		for (let j = 0; j < images.length; j++) {
+			const refImg: IReferenceImage = await createProductImageReference(productsFromDB[i], images[j]);
+			logger.log(`${i}.${j}-reference image created. ${refImg.uri}`);
 		}
 	}
 }
@@ -119,32 +117,37 @@ async function createProductIncludingAddToSetAndAddReferenceImage() {
 async function deleteProduct(productId: string) {
 	const productPath = client.productPath(projectId, location, productId);
 
-	await client.deleteProduct({name: productPath});
-
+	await client.deleteProduct({ name: productPath });
 }
 
 async function deleteAllProducts() {
 	const productsFromDB = await getProductsFromDB();
-	for(let i = 0; i < productsFromDB.length; i++) {
-		await deleteProduct(productsFromDB[i].productId + '__' + productsFromDB[i].colorId)
+	for (let i = 0; i < productsFromDB.length; i++) {
+		await deleteProduct(productsFromDB[i].productId + '__' + productsFromDB[i].colorId);
 		logger.log(`${i}. Product ${productsFromDB[i].productId} deleted.`);
 	}
 }
 
 async function downloadAndUploadAllImages() {
 	const productsFromDB = await getProductsFromDB();
-	for(let i = 0; i < productsFromDB.length; i++) {
-		const imageUrls:string[] = productsFromDB[i].imageUrls.split(' | ');
-		for(let j=0; j<imageUrls.length; j++) {
-			const url = imageUrls[j]
-			const filename = imageUrls[j].substring(imageUrls[j].lastIndexOf('/')+1, imageUrls[j].length)
-			const savePath = path.resolve(__dirname, '../downloaded_images/', productsFromDB[i].productId, productsFromDB[i].colorId, filename)
+	for (let i = 0; i < productsFromDB.length; i++) {
+		const imageUrls: string[] = productsFromDB[i].imageUrls.split(' | ');
+		for (let j = 0; j < imageUrls.length; j++) {
+			const url = imageUrls[j];
+			const filename = imageUrls[j].substring(imageUrls[j].lastIndexOf('/') + 1, imageUrls[j].length);
+			const savePath = path.resolve(
+				__dirname,
+				'../downloaded_images/',
+				productsFromDB[i].productId,
+				productsFromDB[i].colorId,
+				filename
+			);
 
-			await downloadImage(url, savePath)
-			logger.log(`${i}.${j}-Image downloaded successfully, ${savePath}`)
+			await downloadImage(url, savePath);
+			logger.log(`${i}.${j}-Image downloaded successfully, ${savePath}`);
 
-			const storage = new Storage()
-			const destinationPath = `${productsFromDB[i].productId}/${productsFromDB[i].colorId}/${filename}`
+			const storage = new Storage();
+			const destinationPath = `${productsFromDB[i].productId}/${productsFromDB[i].colorId}/${filename}`;
 			await storage.bucket('lulu-product-images').upload(savePath, {
 				destination: destinationPath,
 			});
@@ -153,8 +156,8 @@ async function downloadAndUploadAllImages() {
 	}
 }
 
-async function downloadImage(url:string, savePath:string): Promise<void> {
-	ensureDirectoryExists(savePath)
+async function downloadImage(url: string, savePath: string): Promise<void> {
+	ensureDirectoryExists(savePath);
 	const writer = fs.createWriteStream(savePath);
 
 	const response = await axios({
@@ -171,7 +174,7 @@ async function downloadImage(url:string, savePath:string): Promise<void> {
 	});
 }
 
-function ensureDirectoryExists(filePath:string) {
+function ensureDirectoryExists(filePath: string) {
 	const dir = path.dirname(filePath);
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, { recursive: true });
@@ -179,16 +182,18 @@ function ensureDirectoryExists(filePath:string) {
 }
 
 async function getSimilarProductsFile() {
-	const productSetPath = client.productSetPath(
-		projectId,
-		location,
-		productSetId
+	const productSetPath = client.productSetPath(projectId, location, productSetId);
+	const filePath = path.resolve(
+		__dirname,
+		'../downloaded_images',
+		'prod11190042',
+		'48440',
+		'prod11190042_48440_img5.jpg'
 	);
-	const filePath = path.resolve(__dirname, '../downloaded_images', 'prod11190042', '48440', 'prod11190042_48440_img5.jpg')
 	const content = fs.readFileSync(filePath, 'base64');
 	const request = {
-		image: {content: content},
-		features: [{type: Type.PRODUCT_SEARCH}],
+		image: { content: content },
+		features: [{ type: Type.PRODUCT_SEARCH }],
 		imageContext: {
 			productSearchParams: {
 				productSet: productSetPath,
@@ -196,7 +201,7 @@ async function getSimilarProductsFile() {
 				filter: '',
 			},
 		},
-	}
+	};
 	const [response] = await imageAnnotatorClient.batchAnnotateImages({
 		requests: [request],
 	});
@@ -205,7 +210,7 @@ async function getSimilarProductsFile() {
 	const results = response['responses'][0]['productSearchResults']['results'];
 	logger.log('\nSimilar product information:');
 	results.forEach(result => {
-		logger.log('score:', result.score)
+		logger.log('score:', result.score);
 		logger.log('Product id:', result['product'].name.split('/')[5]);
 		logger.log('Product display name:', result['product'].displayName);
 		logger.log('Product description:', result['product'].description);
@@ -216,4 +221,4 @@ async function getSimilarProductsFile() {
 // createProductSet();
 // deleteAllProducts()
 // createProductIncludingAddToSetAndAddReferenceImage()
-getSimilarProductsFile()
+getSimilarProductsFile();
