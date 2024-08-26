@@ -6,6 +6,7 @@ import inventoryRouter from './inventory';
 import masterDataRouter from './masterData';
 import paypalRouter from './paypal';
 import productRouter from './product';
+import chatbotRouter from './chatbot';
 
 const rootRouter = Router();
 rootRouter.use('/users', userRouter);
@@ -15,4 +16,5 @@ rootRouter.use('/inventory', inventoryRouter);
 rootRouter.use('/master', masterDataRouter);
 rootRouter.use('/paypal', paypalRouter);
 rootRouter.use('/products', productRouter);
+rootRouter.use('/chat', chatbotRouter);
 export default rootRouter;

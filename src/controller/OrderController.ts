@@ -114,7 +114,9 @@ class OrderController {
 				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
 			}
 
-			order.status = OrderStatus.CREATED;
+			order.status = OrderStatus.UNPAID;
+			const today = new Date(); today.setDate(today.getDate()+2)
+			order.plannedShipmentDate = today
 		} catch (error) {
 			logger.error('error place order', error);
 			return resp

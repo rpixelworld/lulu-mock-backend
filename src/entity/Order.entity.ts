@@ -77,6 +77,9 @@ export class Order {
 	@Column({ nullable: true })
 	paymentComment: string;
 
+	@Column({nullable: true})
+	plannedShipmentDate: Date
+
 	@Column()
 	@CreateDateColumn()
 	createdAt: Date;
