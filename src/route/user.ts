@@ -5,6 +5,7 @@ import { validateAdminJwt, validateJwt } from '../middleware/JwtValidator';
 const userRouter = Router();
 userRouter.post('/', UserController.add);
 userRouter.get('/:userId', UserController.one);
+userRouter.put('/update/:userId', UserController.update);
 userRouter.get('/', [validateAdminJwt], UserController.all);
 
 userRouter.get('/addresses/user', [validateJwt], UserController.getAllShippingAddresses);
