@@ -115,8 +115,9 @@ class OrderController {
 			}
 
 			order.status = OrderStatus.UNPAID;
-			const today = new Date(); today.setDate(today.getDate()+2)
-			order.plannedShipmentDate = today
+			const today = new Date();
+			today.setDate(today.getDate() + 2);
+			order.plannedShipmentDate = today;
 		} catch (error) {
 			logger.error('error place order', error);
 			return resp
