@@ -189,9 +189,18 @@ async function execustToolCall(toolcallId: string, toolName: string, args: any) 
 					},
 				];
 			}
+			if (order.status == OrderStatus.SHIPPED) {
+				return [
+					{
+						role: 'tool',
+						content: `Your order has been shipped to your address at ${AppHelper.formatDate(order.updatedAt)}`,
+						tool_call_id: toolcallId,
+					},
+				];
+			}
 			const plannedDate = AppHelper.formatDate(order.plannedShipmentDate);
 			return [
-				{ role: 'tool', content: `We planned to ship your order at ${plannedDate}`, tool_call_id: toolcallId },
+				{ role: 'tool', content: `Your order will be shipped before ${plannedDate}`, tool_call_id: toolcallId },
 			];
 		default:
 			return [{ role: 'tool', content: 'I am still learning, please comeback later', tool_call_id: toolcallId }];
