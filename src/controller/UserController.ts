@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import gDB from '../InitDataSource';
 import { User } from '../entity/User.entity';
-import { validate } from 'class-validator';
+import { validate, ValidationError } from 'class-validator';
 import ResponseHelper from './ResponseHelper';
 import { logger } from '../LoggerHelper';
 import { ErrorCode } from '../common/ErrorCode';
@@ -81,6 +81,92 @@ class UserController {
 			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
 		} catch (e) {
 			logger.error('find a user failed', e);
+			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
+		}
+	}
+
+	// Update user information
+	static async update(req: Request, resp: Response) {
+		const { userId } = req.params;
+		const { firstName, lastName, password, email } = req.body;
+
+		if (!Number.isInteger(Number(userId))) {
+			return resp
+				.status(400)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid user id'));
+		}
+
+		const db = gDB.getRepository(User);
+		try {
+			let user = await db.findOne({ where: { id: Number(userId) } });
+
+			if (!user) {
+				return resp
+					.status(400)
+					.send(
+						ResponseHelper.generateFailureResult(
+							ErrorCode.USER_NOT_EXIST,
+							`User with id=${userId} not found`
+						)
+					);
+			}
+
+			// 更新用户数据
+			let hasChanges = false;
+			if (firstName !== undefined) {
+				user.firstName = firstName;
+				hasChanges = true;
+			}
+			if (lastName !== undefined) {
+				user.lastName = lastName;
+				hasChanges = true;
+			}
+			if (password !== undefined) {
+				user.password = password;
+				hasChanges = true;
+			}
+			if (email !== undefined) {
+				user.email = email;
+				hasChanges = true;
+			}
+
+			// 仅在有更改时进行验证
+			if (hasChanges) {
+				let errors: ValidationError[] = [];
+				if (password !== undefined) {
+					// 验证密码
+					const passwordErrors = await validate(user, { groups: ['password'] });
+					errors = [...errors, ...passwordErrors];
+				}
+				if (email !== undefined) {
+					// 验证email
+					const emailErrors = await validate(user, { groups: ['email'] });
+					errors = [...errors, ...emailErrors];
+				}
+				// 验证其他字段
+				if (firstName !== undefined || lastName !== undefined) {
+					const otherErrors = await validate(user, { groups: ['update'] });
+					errors = [...errors, ...otherErrors];
+				}
+
+				if (errors.length > 0) {
+					const validationErrors = errors.map(error => ({
+						property: error.property,
+						constraints: error.constraints,
+					}));
+					logger.error('Validation error during update', validationErrors);
+					return resp
+						.status(400)
+						.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, validationErrors));
+				}
+			}
+
+			await db.save(user);
+			delete user.password;
+
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(user));
+		} catch (e) {
+			logger.error('Update user failed', e);
 			resp.status(500).send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, e.driverError));
 		}
 	}
