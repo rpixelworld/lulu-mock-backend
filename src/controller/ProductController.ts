@@ -90,7 +90,7 @@ class ProductController {
 		}
 		return resp.status(200).send(
 			ResponseHelper.generateSuccessResult({
-				uploadedImage: `${process.env.GOOGLE_STORAGE_UPLOAD_REMOTE_BASE}/${process.env.GOOGLE_STORAGE_UPLOAD_BUCKET}/${filename}`,
+				uploadedImage: `${process.env.GOOGLE_STORAGE_UPLOAD_REMOTE_BASE}/${process.env.GOOGLE_STORAGE_UPLOAD_BUCKET}/${filename}?authuser=2`,
 				similars: productsArr,
 			})
 		);
