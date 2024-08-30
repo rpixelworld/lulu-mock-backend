@@ -251,8 +251,52 @@ class UserController {
 		}
 	}
 
+	static async updateAddress(req: Request, resp: Response) {
+		try {
+			const user: User = req['loginUser'];
+			const { addressId } = req.params;
+			const updatedAddressData = req.body;
+
+			if (!Number.isInteger(Number(addressId))) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'Invalid address id'));
+			}
+
+			const addressRepository = gDB.getRepository(ShippingAddress);
+			let address = await addressRepository.findOne({
+				where: { id: Number(addressId), user: user, isDeleted: false },
+			});
+
+			if (!address) {
+				return resp
+					.status(404)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Address not found'));
+			}
+
+			Object.assign(address, updatedAddressData);
+
+			const errors = await validate(address);
+			if (errors.length > 0) {
+				return resp
+					.status(400)
+					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+			}
+
+			await addressRepository.save(address);
+
+			return resp.status(200).send(ResponseHelper.generateSuccessResult(address));
+		} catch (e) {
+			logger.error('Error updating address', e);
+			return resp
+				.status(500)
+				.send(ResponseHelper.generateFailureResult(ErrorCode.DB_ERROR, 'Internal server error'));
+		}
+	}
+
 	static async addShippingAddress(req: Request, resp: Response) {
 		try {
+			console.log('request body', req.body)
 			const user: User = req['loginUser'];
 			logger.debug(user);
 			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
@@ -260,11 +304,15 @@ class UserController {
 			// shippingAddress.countryCode = 'CA';
 			const errors = await validate(shippingAddress);
 			if (errors.length > 0) {
-				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+				console.log('Validation errors', errors);
+				if (!shippingAddress.firstName || !shippingAddress.lastName) {
+					return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'firstName or lastName is missing'));
+				}
+
 			}
 
 			await gDB.getRepository(ShippingAddress).save(shippingAddress);
-			return resp.status(200).send(ResponseHelper.generateSuccessResult(shippingAddress));
+			return resp.status(200).send(ResponseHelper.generateSuccessResult('Address update successfully'));
 		} catch (e) {
 			logger.error('error place order', e);
 			return resp
