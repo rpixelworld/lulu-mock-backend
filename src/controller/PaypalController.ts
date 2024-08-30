@@ -33,6 +33,9 @@ class PaypalController {
 
 	static async handleResponse(resp: any) {
 		try {
+			if (!resp.ok) {
+				throw new Error(`HTTP error! status: ${resp.status}`);
+			}
 			const jsonResponse = await resp.json();
 			return {
 				jsonResponse,
@@ -40,7 +43,7 @@ class PaypalController {
 			};
 		} catch (err) {
 			const errorMessage = await resp.text();
-			throw new Error(errorMessage);
+			throw new Error(`Response parsing error: ${errorMessage}`);
 		}
 	}
 
@@ -59,7 +62,7 @@ class PaypalController {
 						description: `${order.totalItem} ITEMS FROM LULULEMON`,
 						amount: {
 							currency_code: 'CAD',
-							value: order.orderTotalAmount,
+							value: order.orderTotalAmount.toFixed(2),
 						},
 					},
 				],
