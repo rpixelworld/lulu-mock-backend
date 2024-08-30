@@ -278,9 +278,7 @@ class UserController {
 
 			const errors = await validate(address);
 			if (errors.length > 0) {
-				return resp
-					.status(400)
-					.send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
+				return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, errors));
 			}
 
 			await addressRepository.save(address);
@@ -296,7 +294,7 @@ class UserController {
 
 	static async addShippingAddress(req: Request, resp: Response) {
 		try {
-			console.log('request body', req.body)
+			console.log('request body', req.body);
 			const user: User = req['loginUser'];
 			logger.debug(user);
 			let shippingAddress: ShippingAddress = Object.assign(new ShippingAddress(), req.body);
@@ -306,9 +304,15 @@ class UserController {
 			if (errors.length > 0) {
 				console.log('Validation errors', errors);
 				if (!shippingAddress.firstName || !shippingAddress.lastName) {
-					return resp.status(400).send(ResponseHelper.generateFailureResult(ErrorCode.VALIDATION_ERROR, 'firstName or lastName is missing'));
+					return resp
+						.status(400)
+						.send(
+							ResponseHelper.generateFailureResult(
+								ErrorCode.VALIDATION_ERROR,
+								'firstName or lastName is missing'
+							)
+						);
 				}
-
 			}
 
 			await gDB.getRepository(ShippingAddress).save(shippingAddress);
