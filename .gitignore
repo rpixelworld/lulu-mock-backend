@@ -7,3 +7,6 @@
 /downloaded_images/
 /uploads/*.jpg
 /uploads/*.png
+/uploads/*.webp
+/playground-431906-6c140b1f050a.json
+/.env.development
