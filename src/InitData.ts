@@ -7,7 +7,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { Inventory } from './entity/Inventory.entity';
 import { Product } from './entity/Product.entity';
-import {ProductJson} from "./entity/ProductJson.entity";
+import { ProductJson } from './entity/ProductJson.entity';
 
 const provinceTaxes = [
 	new TaxMaster(Province.AB, 5, null, null),
@@ -153,7 +153,7 @@ export const initProduct = async () => {
 	logger.info(`initializing ${productIdsArr.length} products completed`);
 };
 
-export const initProductJson = async ()=> {
+export const initProductJson = async () => {
 	const products: any[] = loadMockProductsfromJson(5);
 	// console.log(products[0])
 	let productIdsArr: string[] = [];
@@ -161,7 +161,9 @@ export const initProductJson = async ()=> {
 
 	for (let i = 0; i < 50; i++) {
 		let product: any = products[i];
-		if(!product || !product.name || product.name.trim() == '') {continue}
+		if (!product || !product.name || product.name.trim() == '') {
+			continue;
+		}
 		let productId: string = product.productId;
 		if (productIdsArr.includes(productId)) {
 			logger.info(`${productId} is a duplicate product, skip`);
@@ -171,7 +173,7 @@ export const initProductJson = async ()=> {
 			logger.info(`${productId} empty product name, skip`);
 		}
 		productIdsArr.push(productId);
-		productJsonArr.push(new ProductJson(product.productId, JSON.stringify(product)))
+		productJsonArr.push(new ProductJson(product.productId, JSON.stringify(product)));
 
 		await saveProductJson(productJsonArr).then(() => {
 			logger.info(`initializing product_json ${productJsonArr.length} records inserted`);
@@ -180,7 +182,7 @@ export const initProductJson = async ()=> {
 
 	// console.log(productJsonArr[0])
 	logger.info(`initializing ${productIdsArr.length} products completed`);
-}
+};
 
 const saveProduct = async (productArr: Product[]) => {
 	const queryRunner = gDB.createQueryRunner();

@@ -9,12 +9,12 @@ import vision = require('@google-cloud/vision');
 import { google } from '@google-cloud/vision/build/protos/protos';
 import Type = google.cloud.vision.v1.Feature.Type;
 import axios from 'axios';
-import * as fs from "node:fs";
-import {User} from "../entity/User.entity";
-import {Repository, SelectQueryBuilder} from "typeorm";
-import {Order} from "../entity/Order.entity";
-import {ProductJson} from "../entity/ProductJson.entity";
-import gDB from "../InitDataSource";
+import * as fs from 'node:fs';
+import { User } from '../entity/User.entity';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Order } from '../entity/Order.entity';
+import { ProductJson } from '../entity/ProductJson.entity';
+import gDB from '../InitDataSource';
 
 const client = new vision.ProductSearchClient();
 const imageAnnotatorClient = new vision.ImageAnnotatorClient();
@@ -104,9 +104,7 @@ class ProductController {
 
 	static getFilters(req: Request, resp: Response) {
 		const filters = fs.readFileSync(__dirname + '/../data/filters.json').toString();
-		return resp.status(200).send(
-			ResponseHelper.generateMockSuccessResult(JSON.parse(filters))
-		);
+		return resp.status(200).send(ResponseHelper.generateMockSuccessResult(JSON.parse(filters)));
 	}
 
 	static async searchProduct(req: Request, resp: Response) {
@@ -115,37 +113,38 @@ class ProductController {
 			const { page = '1', pageSize = '20' } = req.query;
 			const queryBuilder: SelectQueryBuilder<ProductJson> = createQueryBuilder(repo, req);
 			const [products, total] = await queryBuilder.getManyAndCount();
-			const productJsonArr: string[] = products.map(prod => prod.productDetail)
+			const productJsonArr: string[] = products.map(prod => prod.productDetail);
 
 			const filters = JSON.parse(fs.readFileSync(__dirname + '/../data/filters.json').toString());
 			// console.log(req.body)
-			if(req.body && req.body.Activity) {
-				const {Activity, Category, Collection, Colour, Fabric, Features, Gender, Size, SizeType, Type} = req.body
-				for(let i=0; i<Gender.length; i++){
+			if (req.body && req.body.Activity) {
+				const { Activity, Category, Collection, Colour, Fabric, Features, Gender, Size, SizeType, Type } =
+					req.body;
+				for (let i = 0; i < Gender.length; i++) {
 					filters['Gender'][i].isChecked = Gender[i].isChecked;
 				}
-				for(let i=0; i<Category.length; i++){
+				for (let i = 0; i < Category.length; i++) {
 					filters['Category'][i].isChecked = Category[i].isChecked;
 				}
-				for(let i=0; i<Type.length; i++){
+				for (let i = 0; i < Type.length; i++) {
 					filters['Type'][i].isChecked = Type[i].isChecked;
 				}
-				for(let i=0; i<Activity.length; i++){
+				for (let i = 0; i < Activity.length; i++) {
 					filters['Activity'][i].isChecked = Activity[i].isChecked;
 				}
-				for(let i=0; i<Size.length; i++){
+				for (let i = 0; i < Size.length; i++) {
 					filters['Size'][i].isChecked = Size[i].isChecked;
 				}
-				for(let i=0; i<SizeType.length; i++){
+				for (let i = 0; i < SizeType.length; i++) {
 					filters['SizeType'][i].isChecked = SizeType[i].isChecked;
 				}
-				for(let i=0; i<Collection.length; i++){
+				for (let i = 0; i < Collection.length; i++) {
 					filters['Collection'][i].isChecked = Collection[i].isChecked;
 				}
-				for(let i=0; i<Features.length; i++){
+				for (let i = 0; i < Features.length; i++) {
 					filters['Features'][i].isChecked = Features[i].isChecked;
 				}
-				for(let i=0; i<Fabric.length; i++){
+				for (let i = 0; i < Fabric.length; i++) {
 					filters['Fabric'][i].isChecked = Fabric[i].isChecked;
 				}
 			}
@@ -153,21 +152,23 @@ class ProductController {
 			return resp.status(200).send(
 				ResponseHelper.generateMockSuccessResult({
 					filters: filters,
-					pageParams: {totalProducts: total, perPage: Number(pageSize), curPage: Number(page), totalPage: Math.ceil(total/Number(pageSize))},
+					pageParams: {
+						totalProducts: total,
+						perPage: Number(pageSize),
+						curPage: Number(page),
+						totalPage: Math.ceil(total / Number(pageSize)),
+					},
 					products: productJsonArr,
 				})
-			)
-		}
-		catch (err) {
-
-		}
+			);
+		} catch (err) {}
 	}
 
 	static async searchProductById(req: Request, resp: Response) {
 		const { productId } = req.params;
 		try {
 			const product: ProductJson = await gDB.getRepository(ProductJson).findOne({
-				where: { productId: productId }
+				where: { productId: productId },
 			});
 			return resp.status(200).send(ResponseHelper.generateMockSuccessResult(product.productDetail));
 		} catch (e) {

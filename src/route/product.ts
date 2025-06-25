@@ -8,7 +8,7 @@ const productRouter = Router();
 productRouter.post('/uploadSearch', upload.single('file'), ProductController.uploadSearch);
 productRouter.post('/similar', ProductController.getSimilarProducts);
 productRouter.get('/filter', ProductController.getFilters);
-productRouter.post('/allProducts', ProductController.searchProduct)
-productRouter.get('/:productId', ProductController.searchProductById)
+productRouter.post('/allProducts', ProductController.searchProduct);
+productRouter.get('/:productId', ProductController.searchProductById);
 
 export default productRouter;
