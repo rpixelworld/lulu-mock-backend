@@ -32,6 +32,14 @@ class ResponseHelper {
 			currentTotal: currentTotal,
 		};
 	}
+
+	static generateMockSuccessResult(data: any) {
+		return {
+			status: 'success',
+			message: 'mock response',
+			rs: data,
+		};
+	}
 }
 
 export default ResponseHelper;

@@ -7,6 +7,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { Inventory } from './entity/Inventory.entity';
 import { Product } from './entity/Product.entity';
+import {ProductJson} from "./entity/ProductJson.entity";
 
 const provinceTaxes = [
 	new TaxMaster(Province.AB, 5, null, null),
@@ -111,6 +112,11 @@ function loadProductsfromJson(): any[] {
 	return jsonData.products;
 }
 
+function loadMockProductsfromJson(i): any[] {
+	const jsonData = JSON.parse(fs.readFileSync(path.resolve(__dirname, `mock_allproducts_${i}.json`), 'utf8'));
+	return jsonData.rs.products;
+}
+
 export const initProduct = async () => {
 	const products: any[] = loadProductsfromJson();
 
@@ -147,6 +153,35 @@ export const initProduct = async () => {
 	logger.info(`initializing ${productIdsArr.length} products completed`);
 };
 
+export const initProductJson = async ()=> {
+	const products: any[] = loadMockProductsfromJson(5);
+	// console.log(products[0])
+	let productIdsArr: string[] = [];
+	let productJsonArr: ProductJson[] = [];
+
+	for (let i = 0; i < 50; i++) {
+		let product: any = products[i];
+		if(!product || !product.name || product.name.trim() == '') {continue}
+		let productId: string = product.productId;
+		if (productIdsArr.includes(productId)) {
+			logger.info(`${productId} is a duplicate product, skip`);
+			continue;
+		}
+		if (!product.name || product.name.trim() == '') {
+			logger.info(`${productId} empty product name, skip`);
+		}
+		productIdsArr.push(productId);
+		productJsonArr.push(new ProductJson(product.productId, JSON.stringify(product)))
+
+		await saveProductJson(productJsonArr).then(() => {
+			logger.info(`initializing product_json ${productJsonArr.length} records inserted`);
+		});
+	}
+
+	// console.log(productJsonArr[0])
+	logger.info(`initializing ${productIdsArr.length} products completed`);
+}
+
 const saveProduct = async (productArr: Product[]) => {
 	const queryRunner = gDB.createQueryRunner();
 	await queryRunner.connect();
@@ -169,14 +204,37 @@ const saveProduct = async (productArr: Product[]) => {
 	}
 };
 
+const saveProductJson = async (productJsonArr: ProductJson[]) => {
+	const queryRunner = gDB.createQueryRunner();
+	await queryRunner.connect();
+	await queryRunner.startTransaction();
+	logger.info('db connection created and transaction started');
+	try {
+		logger.info(`saving ${productJsonArr.length} records to tbl_product_json`);
+		for (let i = 0; i < productJsonArr.length; i++) {
+			await queryRunner.manager.save(productJsonArr[i]);
+		}
+
+		await queryRunner.commitTransaction();
+		logger.info(`transaction committed`);
+	} catch (e) {
+		logger.error(`Exception saving product, rollback`, e);
+		await queryRunner.rollbackTransaction();
+	} finally {
+		await queryRunner.release();
+		logger.info(`connection released`);
+	}
+};
+
 async function execute() {
 	await gDB.initialize();
 	// await initTaxMaster();
 	// await initInventory();
-	await initProduct();
+	// await initProduct();
+	// await initProductJson();
 }
 
-execute().then(() => {
-	logger.info('data initialization completed!!');
-	process.exit(0);
-});
+// execute().then(() => {
+// 	logger.info('data initialization completed!!');
+// 	process.exit(0);
+// });
